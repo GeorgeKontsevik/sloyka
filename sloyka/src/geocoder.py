@@ -27,8 +27,8 @@ import pandas as pd
 import pymorphy2
 import requests
 import torch
-import string
 import difflib
+import string
 import math
 from sloyka.src.constants import (
     START_INDEX_POSITION,
@@ -205,7 +205,7 @@ class Streets:
             "набережная", "канала", "канал", "дорога на", "дорога в",
             "шоссе", "аллея", "проезд", "линия"
         ]
-        
+
         best_match_ratio = 0
         best_match = None
 
@@ -214,7 +214,7 @@ class Streets:
             if ratio >= 0.4 and ratio > best_match_ratio:
                 best_match_ratio = ratio
                 best_match = word
-        
+
         return best_match.lower() if best_match else None
 
     @staticmethod
@@ -479,6 +479,19 @@ class Geocoder:
                 else None
             )
         return street_names_df
+    
+    @staticmethod
+    def _join_only_full_street_name_numbers(x):
+        street_name = x['only_full_street_name']
+        house_num = x['Numbers']
+        if street_name and house_num:
+            return street_name + ' ' + house_num
+        elif street_name and not house_num:
+            return street_name
+        elif not street_name and house_num:
+            return None
+        else:
+            return None
 
     def find_word_form(
         self, df: pd.DataFrame, strts_df: pd.DataFrame
@@ -519,7 +532,7 @@ class Geocoder:
                         + " Россия"
                         for street in only_streets_full
                     ]
-
+                
                     df.loc[idx, "full_street_name"] = ",".join(streets_full)
                     df.loc[idx, "only_full_street_name"] = ",".join(only_streets_full)
 
@@ -553,8 +566,9 @@ class Geocoder:
         new_df = tmp_df_1.to_frame().join(tmp_df_2.to_frame()) 
 
         df.drop(columns=['only_full_street_name'], inplace=True)
-        df = df.merge(new_df, left_on=df.index, right_on=new_df.index)
-        df.drop(columns=['key_0'], inplace=True)
+        df = df.merge(new_df, left_index=True, right_index=True)
+        logger.debug(df)
+        # df.drop(columns=['key_0'], inplace=True)
 
         # new_df = df["only_full_street_name"].explode()
         # new_df.name = "only_full_street_name"
@@ -564,7 +578,8 @@ class Geocoder:
         # print(df.head())
         df["only_full_street_name"] = df["only_full_street_name"].astype(str)
         df["location_options"] = df["location_options"].astype(str)
-        df['only_full_street_name'] = df['only_full_street_name'].map(lambda x: None if x == 'nan' else x)
+        df['only_full_street_name'] = df['only_full_street_name'].map(lambda x: None if x == 'nan' or x == '' else x)
+        df['only_full_street_name_numbers'] = df.apply(Geocoder._join_only_full_street_name_numbers, axis=1)
         return df
 
     @staticmethod
