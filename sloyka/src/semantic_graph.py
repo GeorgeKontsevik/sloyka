@@ -6,7 +6,7 @@ More convenient to use after extracting data from geocoder.
 
 The Semgraph class has the following methods:
 
-@method:clean_from_dublicates:
+@method:clean_from_duplicates:
 A function to clean a DataFrame from duplicates based on specified columns.
 
 @method:clean_from_digits:
@@ -20,9 +20,9 @@ toponym columns.
 Creates a new DataFrame by aggregating the data based on the provided text and toponyms columns.
 """
 import time
-import numpy as np
+import json
 import itertools
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import re
 import torch
 import nltk
@@ -35,8 +35,11 @@ from transformers import BertTokenizer, BertModel
 from keybert import KeyBERT
 import geopy.distance
 from shapely.geometry import Point
+from flair.data import Sentence
+from flair.models import SequenceTagger
 
-from sloyka.src.constants import STOPWORDS, TAG_ROUTER, SPB_DISTRICTS
+from sloyka.src.topic_modeler import TopicModeler
+from sloyka.src.constants import STOPWORDS, TAG_ROUTER
 
 nltk.download('stopwords')
 
@@ -47,28 +50,32 @@ class Semgraph:
     """
     This is the main class of semantic graph module. 
     It is aimed to build a semantic graph based on the provided data and parameters.
-    More convinient to use after extracting data from geocoder.
+    More convenient to use after extracting data from geocoder.
 
-    Param:
-    bert_name: the name of the BERT model to use (default is 'DeepPavlov/rubert-base-cased')
-    language: the language of the BERT model (default is 'russian')
-    device: the device to use for inference (default is 'cpu')
+    Parameters:
+        bert_name (str): the name of the BERT model to be used. Default is 'DeepPavlov/rubert-base-cased'
+        service_model_name (str): the service model to be used, if any exists. Default is 'Glebosol/city_services'.
+        language (str): the language for the BERT model, default is 'russian'
+        device (str): the device to run the model on, default is 'cpu'
     """
 
     def __init__(self,
                  bert_name: str = 'DeepPavlov/rubert-base-cased',
+                 service_model_name: str = 'Glebosol/city_services',
                  language: str = 'russian',
                  device: str = 'cpu'
                  ) -> None:
 
         self.language = language
         self.device = device
+        self.service_model_name = service_model_name
+        self.service_model = SequenceTagger.load(service_model_name)
         self.tokenizer = BertTokenizer.from_pretrained(bert_name)
         self.model_name = bert_name
         self.model = BertModel.from_pretrained(bert_name).to(device)
 
     @staticmethod
-    def clean_from_dublicates(data: pd.DataFrame or gpd.GeoDataFrame,
+    def clean_from_duplicates(data: pd.DataFrame or gpd.GeoDataFrame,
                               id_column: str
                               ) -> pd.DataFrame or gpd.GeoDataFrame:
         """
@@ -124,7 +131,7 @@ class Semgraph:
         Args:
             data (pd.DataFrame or gpd.GeoDataFrame): The input DataFrame.
             text_column (str): The name of the column containing the text to be cleaned.
-            name_column (str): The name of the column containing the toponym name (e.g. Nevski, Moika etc).
+            name_column (str): The name of the column containing the toponym name (e.g. Nevski, Moika etc.).
             toponym_type_column (str): The name of the column containing the toponym type
             (e.g. street, alley, avenue etc.).
 
@@ -173,23 +180,65 @@ class Semgraph:
 
     @staticmethod
     def fill_empty_toponym(data: pd.DataFrame or gpd.GeoDataFrame,
-                           toponym_column: str):
+                           toponym_column: str) -> None:
+        """
+        A function to fill empty values in the specified toponym column with None.
+
+        Args:
+            data (pd.DataFrame or gpd.GeoDataFrame): The input dataframe containing the toponym data.
+            toponym_column (str): The name of the column containing the toponym data.
+
+        Returns:
+            None
+        """
 
         for i in range(len(data)):
-            check = data[toponym_column].iloc[i]
-            if check == '':
+            check_raw = data[toponym_column].iloc[i]
+            if check_raw == '':
                 data.at[i, toponym_column] = None
+
+        return data
+
+    def extract_services(self,
+                         data: pd.DataFrame or gpd.GeoDataFrame,
+                         text_column: str,
+                         ) -> pd.DataFrame or gpd.GeoDataFrame:
+        """
+        Extracts services from the given DataFrame or GeoDataFrame and adds a 'service' column to the DataFrame
+        or GeoDataFrame.
+
+        Args:
+            data (pd.DataFrame or gpd.GeoDataFrame): The input data containing text information.
+            text_column (str): The name of the column containing the text information.
+
+        Returns:
+            pd.DataFrame or gpd.GeoDataFrame: The modified data with the 'service' column added.
+        """
+
+        data["service"] = None
+
+        print('Extracting services...')
+        time.sleep(1)
+
+        for i in tqdm(range(len(data))):
+            text = data[text_column][i]
+            sentence = Sentence(text)
+            self.service_model.predict(sentence)
+            try:
+                result = sentence.to_tagged_string().split('→')
+                result = result[1].lstrip()
+                result = result.replace('/Service', '')
+                result = json.loads(result)
+                data.at[i, "service"] = result
+
+            except:
+                continue
 
         return data
 
     def extract_keywords(self,
                          data: pd.DataFrame or gpd.GeoDataFrame,
                          text_column: str,
-                         text_type_column: str,
-                         toponym_column: str,
-                         id_column: str,
-                         post_id_column: str,
-                         parents_stack_column: str,
                          semantic_key_filter: float = 0.6,
                          top_n: int = 1
                          ) -> pd.DataFrame or gpd.GeoDataFrame:
@@ -199,11 +248,6 @@ class Semgraph:
         Args:
             data (pd.DataFrame or gpd.GeoDataFrame): The input data containing information.
             text_column (str): The column in the data containing text information.
-            text_type_column (str): The column in the data indicating the type of text (e.g., post, comment, reply).
-            toponym_column (str): The column in the data containing toponym information.
-            id_column (str): The column in the data containing unique text identifiers.
-            post_id_column (str): The column in the data containing post identifiers for comments and replies.
-            parents_stack_column (str): The column in the data containing information about parent-child relationships to comments.
             semantic_key_filter (float, optional): The threshold for semantic key filtering. Defaults to 0.75.
             top_n (int, optional): The number of top keywords to extract. Defaults to 1.
 
@@ -214,97 +258,91 @@ class Semgraph:
         model = KeyBERT(model=self.model)
         morph = pymorphy3.MorphAnalyzer()
 
-        data['words_score'] = None
-        data['texts_ids'] = None
+        data[['word', 'key_score', 'tag']] = None
 
-        toponym_dict = {}
-        word_dict = {}
+        print('Extracting keywords...')
+        time.sleep(1)
 
-        chains = ['post', 'comment', 'reply']
+        for i in tqdm(range(len(data))):
+            text = data[text_column].iloc[i]
+            extraction = model.extract_keywords(text, top_n=top_n, stop_words=RUS_STOPWORDS)
+            if extraction:
+                score = extraction[0][1]
+                if score > semantic_key_filter:
+                    word_score = extraction[0]
+                    p = morph.parse(word_score[0])[0]
+                    if p.tag.POS in TAG_ROUTER.keys():
+                        word = p.normal_form
+                        tag = p.tag.POS
 
-        for chain in chains:
-            chain_gdf = data.loc[data[text_type_column] == chain]
-            chain_gdf = chain_gdf.dropna(subset=toponym_column)
-            chain_toponym_list = list(chain_gdf[id_column])
+                        word_info = (word, score, tag)
 
-            exclude_list = []
+                        data.at[i, 'word'] = word
+                        data.at[i, 'key_score'] = score
+                        data.at[i, 'tag'] = tag
 
-            print(f'Extracting keywords from {chain} chains...')
-            time.sleep(1)
-
-            for i in tqdm(chain_toponym_list):
-                toponym = data[toponym_column].loc[data[id_column] == i].iloc[0]
-
-                ids_text_to_extract = list((data[id_column].loc[
-                    (data[post_id_column] == i)
-                    & (~data[id_column].isin(exclude_list))
-                    & (~data[parents_stack_column].isin(chain_toponym_list))
-                    ]))
-
-                texts_to_extract = list((data[text_column].loc[
-                                                               (data[post_id_column] == i)
-                                                               & (~data[id_column].isin(exclude_list))
-                                                               & (~data[parents_stack_column].isin(chain_toponym_list))
-                                                               ]
-                                         ))
-
-                ids_text_to_extract.extend(list(data[id_column].loc[data[id_column] == i]))
-                texts_to_extract.extend(list(data[text_column].loc[data[id_column] == i]))
-                words_to_add = []
-                id_to_add = []
-                texts_to_add = []
-
-                for j, text in zip(ids_text_to_extract, texts_to_extract):
-                    extraction = model.extract_keywords(text, top_n=top_n, stop_words=RUS_STOPWORDS)
-                    if extraction:
-                        score = extraction[0][1]
-                        if score > semantic_key_filter:
-                            word_score = extraction[0]
-                            p = morph.parse(word_score[0])[0]
-                            if p.tag.POS in TAG_ROUTER.keys():
-                                word = p.normal_form
-                                tag = p.tag.POS
-
-                                word_info = (word, score, tag)
-
-                                words_to_add.append(word_info)
-                                id_to_add.append(j)
-                                texts_to_add.append(text)
-
-                                word_dict[word] = word_dict.get(word, 0) + 1
-
-                if words_to_add:
-                    toponym_dict[toponym] = toponym_dict.get(toponym, 0) + 1
-
-                    index = data.index[data.id == i][0]
-                    data.at[index, 'words_score'] = words_to_add
-                    data.at[index, 'texts_ids'] = id_to_add
-
-            exclude_list += chain_toponym_list
-
-        df_to_graph = data.dropna(subset='words_score')
-
-        return [df_to_graph, toponym_dict, word_dict]
+        return data
 
     @staticmethod
     def convert_df_to_edge_df(data: pd.DataFrame or gpd.GeoDataFrame,
+                              id_column: str,
+                              type_column: str,
+                              post_id_column: str,
+                              parents_stack_column: str,
                               toponym_column: str,
                               word_info_column: str = 'words_score'
                               ) -> pd.DataFrame or gpd.GeoDataFrame:
 
+        types = ['post', 'comment', 'reply']
+
         edge_list = []
 
-        for i in data[toponym_column]:
-            current_df = data.loc[data[toponym_column] == i]
-            for j in range(len(current_df)):
-                toponym = current_df[toponym_column].iloc[j]
-                word_nodes = current_df[word_info_column].iloc[j]
+        for t in types:
+            chain_gdf = data.loc[data['type'] == t].dropna(subset='only_full_street_name_numbers')
+            type_ids = chain_gdf['id'].tolist()
 
-                for k in word_nodes:
-                    if k[2] in TAG_ROUTER.keys():
-                        edge_list.append([toponym, k[0], k[1], TAG_ROUTER[k[2]]])
+            exclude_list = []
 
-        edge_df = pd.DataFrame(edge_list, columns=['FROM', 'TO', 'distance', 'type'])
+            for i in tqdm(type_ids, desc=f'Adding edges from {t} chains'):
+
+                if t == 'post':
+                    post_comment = data[id_column].loc[
+                        (data[post_id_column] == i) & (data[toponym_column].isna())].tolist()
+                    chains = data[id_column].loc[(data[post_id_column] == i) & (data[toponym_column].isna()) & (
+                        data[parents_stack_column].isin(post_comment))].tolist() + post_comment + [i]
+
+                elif t == 'comment':
+                    chains = data[id_column].loc[
+                                 (data[post_id_column] == i) & (~data[toponym_column].isna())].tolist() + [i]
+
+                elif t == 'reply':
+                    chains = [i]
+
+                else:
+                    continue
+
+                toponym = data[toponym_column].loc[data[id_column] == i].iloc[0]
+
+                for j in chains:
+
+                    word = data['word'].loc[data[id_column] == j].iloc[0]
+
+                    if word:
+                        score = data['key_score'].loc[data[id_column] == j].iloc[0]
+                        tag = data['tag'].loc[data[id_column] == j].iloc[0]
+                        if tag:
+                            edge_type = TAG_ROUTER[tag]
+                            edge_list.append([toponym, word, score, edge_type, t])
+                        else:
+                            edge_list.append([toponym, word, score, None, t])
+
+                        service = data['service'].loc[data[id_column] == j].iloc[0]
+                        if service:
+                            edge_list.append([word, service, None, 'описывает', t])
+
+        edge_list_columns = ['source', 'target', 'weight', 'type']
+
+        edge_df = pd.DataFrame(edge_list, columns=edge_list_columns)
 
         return edge_df
 
@@ -392,8 +430,8 @@ class Semgraph:
 
         Args:
             G (nx.classes.graph.Graph): Prebuild input graph.
-            geocoded_data (gpd.GeoDataFrame): Data containing toponim, location and geometry of toponim.
-            toponym_column (str): The name of the column containing the toponim data.
+            geocoded_data (gpd.GeoDataFrame): Data containing toponym, location and geometry of toponym.
+            toponym_column (str): The name of the column containing the toponym data.
             location_column (str): The name of the column containing the location data.
             geometry_column (str): The name of the column containing the geometry data.
 
@@ -406,7 +444,6 @@ class Semgraph:
 
         for i in toponyms_list:
             if i in all_toponyms_list:
-                index = all_toponyms_list.index(i)
                 G.nodes[i]['Location'] = str(geocoded_data[location_column].iloc[all_toponyms_list.index(i)])
 
         for i in toponyms_list:
@@ -683,7 +720,7 @@ class Semgraph:
             nx.classes.graph.Graph: The constructed graph.
         """
 
-        data = self.clean_from_dublicates(data,
+        data = self.clean_from_duplicates(data,
                                           id_column)
 
         data = self.clean_from_digits(data,
@@ -696,6 +733,8 @@ class Semgraph:
 
         data = self.clean_from_links(data,
                                      text_column)
+
+        data = self.extract_services(data, text_column)
 
         extracted = self.extract_keywords(data,
                                           text_column,
@@ -832,11 +871,28 @@ class Semgraph:
 
 
 # debugging
-# if __name__ == '__main__':
-#     file = open("C:\\Users\\thebe\\Downloads\\test.geojson", encoding='utf-8')
-#     test_gdf = gpd.read_file(file)
-#
-#     sm = Semgraph()
+if __name__ == '__main__':
+    file = open("C:\\Users\\thebe\\Downloads\\test.geojson", encoding='utf-8')
+    test_gdf = gpd.read_file(file)
+
+    sm = Semgraph(service_model_path="C:\\Users\\thebe\\OneDrive - ITMO UNIVERSITY\\НИРМА\\models\\best-model.pt")
+
+    service_gdf = sm.extract_services(test_gdf, 'text')
+
+    processed_data = sm.extract_keywords(service_gdf,
+                                         'text',
+                                         'type',
+                                         'only_full_street_name_numbers',
+                                         'id',
+                                         'post_id',
+                                         'parents_stack',
+                                         semantic_key_filter=0.75,
+                                         top_n=1)
+
+    gdf = processed_data[0].dropna(subset=['services'])
+    check = gdf.iloc[0]
+
+    print(check)
 #
 #     G = sm.build_graph(test_gdf[:3000],
 #                        id_column='id',
