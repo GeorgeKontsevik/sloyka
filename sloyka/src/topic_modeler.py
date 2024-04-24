@@ -6,12 +6,6 @@ The TopicModeler class has the following methods:
 
 @method:process_topics:
 The main function, which is used to process the topics for each day in the specified date range, and merge topics to create a global topic model.
-
-@method:create_topic_model:
-Generates topic model for the set of texts.
-
-@method:handle_clusters:
-Splits texts for one time period into texts in clusters and outliers.
 """
 import geopandas as gpd
 import pandas as pd
