@@ -10,7 +10,7 @@ from .src import (
     Streets, 
     NER_parklike,
     VKParser,
-    TopicModeler
+    City_services
 )
 
 __all__ = [
@@ -21,8 +21,8 @@ __all__ = [
     "Semgraph",
     "Streets", 
     "NER_parklike",
-    "VKParser"
-    "TopicModeler"
+    "VKParser",
+    "City_services"
 ]
 
 logger.remove()
