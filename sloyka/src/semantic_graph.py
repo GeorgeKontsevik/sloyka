@@ -20,7 +20,7 @@ toponym columns.
 Creates a new DataFrame by aggregating the data based on the provided text and toponyms columns.
 """
 import time
-import json
+import numpy as np
 import itertools
 from tqdm.auto import tqdm
 import re
@@ -35,13 +35,13 @@ from transformers import BertTokenizer, BertModel
 from keybert import KeyBERT
 import geopy.distance
 from shapely.geometry import Point
-from flair.data import Sentence
-from flair.models import SequenceTagger
 
 from sloyka.src.topic_modeler import TopicModeler
 from sloyka.src.constants import STOPWORDS, TAG_ROUTER
 
+
 nltk.download('stopwords')
+
 
 RUS_STOPWORDS = stopwords.words('russian') + STOPWORDS
 
@@ -54,22 +54,18 @@ class Semgraph:
 
     Parameters:
         bert_name (str): the name of the BERT model to be used. Default is 'DeepPavlov/rubert-base-cased'
-        service_model_name (str): the service model to be used, if any exists. Default is 'Glebosol/city_services'.
         language (str): the language for the BERT model, default is 'russian'
         device (str): the device to run the model on, default is 'cpu'
     """
 
     def __init__(self,
                  bert_name: str = 'DeepPavlov/rubert-base-cased',
-                 service_model_name: str = 'Glebosol/city_services',
                  language: str = 'russian',
                  device: str = 'cpu'
                  ) -> None:
 
         self.language = language
         self.device = device
-        self.service_model_name = service_model_name
-        self.service_model = SequenceTagger.load(service_model_name)
         self.tokenizer = BertTokenizer.from_pretrained(bert_name)
         self.model_name = bert_name
         self.model = BertModel.from_pretrained(bert_name).to(device)
@@ -199,43 +195,6 @@ class Semgraph:
 
         return data
 
-    def extract_services(self,
-                         data: pd.DataFrame or gpd.GeoDataFrame,
-                         text_column: str,
-                         ) -> pd.DataFrame or gpd.GeoDataFrame:
-        """
-        Extracts services from the given DataFrame or GeoDataFrame and adds a 'service' column to the DataFrame
-        or GeoDataFrame.
-
-        Args:
-            data (pd.DataFrame or gpd.GeoDataFrame): The input data containing text information.
-            text_column (str): The name of the column containing the text information.
-
-        Returns:
-            pd.DataFrame or gpd.GeoDataFrame: The modified data with the 'service' column added.
-        """
-
-        data["service"] = None
-
-        print('Extracting services...')
-        time.sleep(1)
-
-        for i in tqdm(range(len(data))):
-            text = data[text_column][i]
-            sentence = Sentence(text)
-            self.service_model.predict(sentence)
-            try:
-                result = sentence.to_tagged_string().split('→')
-                result = result[1].lstrip()
-                result = result.replace('/Service', '')
-                result = json.loads(result)
-                data.at[i, "service"] = result
-
-            except:
-                continue
-
-        return data
-
     def extract_keywords(self,
                          data: pd.DataFrame or gpd.GeoDataFrame,
                          text_column: str,
@@ -260,10 +219,7 @@ class Semgraph:
 
         data[['word', 'key_score', 'tag']] = None
 
-        print('Extracting keywords...')
-        time.sleep(1)
-
-        for i in tqdm(range(len(data))):
+        for i in tqdm(range(len(data)), desc=f'Extracting keywords from texts'):
             text = data[text_column].iloc[i]
             extraction = model.extract_keywords(text, top_n=top_n, stop_words=RUS_STOPWORDS)
             if extraction:
@@ -290,18 +246,38 @@ class Semgraph:
                               post_id_column: str,
                               parents_stack_column: str,
                               toponym_column: str,
-                              word_info_column: str = 'words_score'
+                              word_column: str = 'word',
+                              service_column: str = 'City_services',
+                              key_score_column: str = 'key_score',
+                              tag_column: str = 'tag'
                               ) -> pd.DataFrame or gpd.GeoDataFrame:
+        """
+        Converts a DataFrame into an edge DataFrame for a network graph construction.
+
+        Args:
+            data (pd.DataFrame or gpd.GeoDataFrame): The input DataFrame containing relevant data.
+            id_column (str): The column name containing unique identifiers.
+            type_column (str): The column name containing types of entries.
+            post_id_column (str): The column name containing unique identifiers of posts to which the comments belong.
+            parents_stack_column (str): The column name containing parent-child relationships.
+            toponym_column (str): The column name containing toponym information.
+            word_column (str): The column name for words extracted from the data. Defaults to 'word'.
+            service_column (str): The column name for the service columns which were extracted from the texts.
+            Defaults to 'City_services'.
+            key_score_column (str): The column name for the key score of the words extracted. Defaults to 'key_score'.
+            tag_column (str): The column name for the tag associated with the words extracted. Defaults to 'tag'.
+
+        Returns:
+            pd.DataFrame or gpd.GeoDataFrame: The resulting edge DataFrame for constructing the graph.
+        """
 
         types = ['post', 'comment', 'reply']
 
         edge_list = []
 
         for t in types:
-            chain_gdf = data.loc[data['type'] == t].dropna(subset='only_full_street_name_numbers')
-            type_ids = chain_gdf['id'].tolist()
-
-            exclude_list = []
+            chain_gdf = data.loc[data[type_column] == t].dropna(subset='only_full_street_name_numbers')
+            type_ids = chain_gdf[id_column].tolist()
 
             for i in tqdm(type_ids, desc=f'Adding edges from {t} chains'):
 
@@ -325,26 +301,84 @@ class Semgraph:
 
                 for j in chains:
 
-                    word = data['word'].loc[data[id_column] == j].iloc[0]
+                    word = data[word_column].loc[data[id_column] == j].iloc[0]
 
                     if word:
-                        score = data['key_score'].loc[data[id_column] == j].iloc[0]
-                        tag = data['tag'].loc[data[id_column] == j].iloc[0]
+                        score = data[key_score_column].loc[data[id_column] == j].iloc[0]
+                        tag = data[tag_column].loc[data[id_column] == j].iloc[0]
                         if tag:
                             edge_type = TAG_ROUTER[tag]
-                            edge_list.append([toponym, word, score, edge_type, t])
+                            edge_list.append((toponym, word, score, edge_type))
                         else:
-                            edge_list.append([toponym, word, score, None, t])
+                            edge_list.append((toponym, word, score, None,))
 
-                        service = data['service'].loc[data[id_column] == j].iloc[0]
+                        service = data[service_column].loc[data[id_column] == j].iloc[0]
                         if service:
-                            edge_list.append([word, service, None, 'описывает', t])
+                            edge_list.append((word, service, None, 'описывает'))
 
         edge_list_columns = ['source', 'target', 'weight', 'type']
 
         edge_df = pd.DataFrame(edge_list, columns=edge_list_columns)
 
         return edge_df
+
+    @staticmethod
+    def get_cluster_distance(data: pd.DataFrame or gpd.GeoDataFrame,
+                             edge_data: pd.DataFrame or gpd.GeoDataFrame,
+                             toponym_column: str = 'only_full_street_name_numbers',
+                             word_column: str = 'word',
+                             cluster_id_column: str = 'cluster_id',
+                             cluster_probability_column: str = 'cluster_probability'
+                             ) -> pd.DataFrame or gpd.GeoDataFrame:
+        """
+        Calculate the distance between word nodes based on the similarity of words within each cluster.
+
+        Parameters:
+            data (pd.DataFrame or gpd.GeoDataFrame): The input data containing the clusters, words, and scores.
+            edge_data (pd.DataFrame or gpd.GeoDataFrame): The existing edge data.
+            toponym_column (str): The column name containing the toponym information.
+            word_column (str): The column name for words extracted from the data.
+            cluster_id_column (str): The column name containing the cluster information.
+            cluster_probability_column (str): The column name for the score of the words extracted.
+
+        Returns:
+            pd.DataFrame or gpd.GeoDataFrame: The updated-edge data with the cluster distances added.
+        """
+
+        clusters = data[cluster_id_column].unique().tolist()
+
+        edges_to_add = []
+
+        for cluster in clusters:
+
+            cluster_df = data.loc[data[cluster_id_column] == cluster].dropna(subset=word_column)
+            toponyms_cluster = cluster_df[toponym_column].unique().tolist()
+            words = cluster_df[word_column].unique().tolist()
+
+            word_score = {}
+
+            for word in words:
+                word_df = cluster_df.loc[cluster_df[word_column] == word]
+                score = word_df[cluster_probability_column].mean()
+
+                if score is not np.nan:
+                    word_score[word] = score
+                else:
+
+            combinations = tuple(itertools.combinations(words, 2))
+
+            for pair in combinations:
+                point1 = np.array(word_score[pair[0]])
+                point2 = np.array(word_score[pair[1]])
+                cosine_distance = 1 - np.dot(point1, point2) / (np.linalg.norm(point1) * np.linalg.norm(point2))
+
+                edges_to_add.append((toponyms_cluster[0], toponyms_cluster[1], cosine_distance, 'сходство'))
+
+        edges_to_add_df = pd.DataFrame(edges_to_add, columns=['source', 'target', 'weight', 'type'])
+
+        edge_data = pd.concat([edge_data, edges_to_add_df])
+
+        return edge_data
 
     def get_semantic_closeness(self,
                                data: pd.DataFrame or gpd.GeoDataFrame,
@@ -872,56 +906,20 @@ class Semgraph:
 
 # debugging
 if __name__ == '__main__':
-    file = open("C:\\Users\\thebe\\Downloads\\test.geojson", encoding='utf-8')
-    test_gdf = gpd.read_file(file)
+    test = pd.read_feather(
+        "C:\\Users\\thebe\\OneDrive - ITMO UNIVERSITY\\НИРМА\\Data\\processed\\test_extracted_all.feather")
 
-    sm = Semgraph(service_model_path="C:\\Users\\thebe\\OneDrive - ITMO UNIVERSITY\\НИРМА\\models\\best-model.pt")
+    sm = Semgraph()
 
-    service_gdf = sm.extract_services(test_gdf, 'text')
+    edges = sm.convert_df_to_edge_df(test,
+                                     'id',
+                                     'type',
+                                     'post_id',
+                                     'parents_stack',
+                                     'only_full_street_name_numbers',
+                                     'word',
+                                     'City_services',
+                                     'key_score')
 
-    processed_data = sm.extract_keywords(service_gdf,
-                                         'text',
-                                         'type',
-                                         'only_full_street_name_numbers',
-                                         'id',
-                                         'post_id',
-                                         'parents_stack',
-                                         semantic_key_filter=0.75,
-                                         top_n=1)
-
-    gdf = processed_data[0].dropna(subset=['services'])
-    check = gdf.iloc[0]
-
-    print(check)
-#
-#     G = sm.build_graph(test_gdf[:3000],
-#                        id_column='id',
-#                        text_column='text',
-#                        text_type_column='type',
-#                        toponym_column='only_full_street_name_numbers',
-#                        toponym_name_column='initial_street',
-#                        toponym_type_column='Toponims',
-#                        post_id_column='post_id',
-#                        parents_stack_column='parents_stack',
-#                        location_column='Location',
-#                        geometry_column='geometry')
-#
-#     # print(len(G.nodes))
-#     #
-#     # G = sm.update_graph(G,
-#     #                     test_gdf[3000:],
-#     #                     id_column='id',
-#     #                     text_column='text',
-#     #                     text_type_column='type',
-#     #                     toponym_column='only_full_street_name',
-#     #                     toponym_name_column='initial_street',
-#     #                     toponym_type_column='Toponims',
-#     #                     post_id_column='post_id',
-#     #                     parents_stack_column='parents_stack',
-#     #                     counts_attribute='counts',
-#     #                     location_column='Location',
-#     #                     geometry_column='geometry')
-#     #
-#     # print(len(G.nodes))
-#     #
-#     # nx.write_graphml(G, 'name.graphml', encoding='utf-8')
+    new_edges = sm.get_cluster_distance(test, edges)
+    print(new_edges)
