@@ -341,37 +341,41 @@ class Geocoder:
             return pd.Series([None, None])
 
     @staticmethod
-    def get_ner_address_natasha(row, exceptions, text_col) -> string:
+    def get_ner_address_natasha(row, exceptions, text_col) -> string or None:
         """
         The function extracts street names in the text, using the Natasha library,
         in cases where BERT could not.
         """
-        if row["Street"] == None or row["Street"] == np.nan:
-            i = row[text_col]
-            location_final = []
-            i = re.sub(r"\[.*?\]", "", i)
-            doc = Doc(i)
-            doc.segment(segmenter)
-            doc.tag_morph(morph_tagger)
-            doc.parse_syntax(syntax_parser)
-            doc.tag_ner(ner_tagger)
-            for span in doc.spans:
-                span.normalize(morph_vocab)
-            location = list(filter(lambda x: x.type == "LOC", doc.spans))
-            for span in location:
-                if (
-                    span.normal.lower()
-                    not in exceptions["Сокращенное наименование"]
-                    .str.lower()
-                    .values
-                ):
-                    location_final.append(span)
-            location_final = [(span.text) for span in location_final]
-            if not location_final:
-                return None
-            return location_final[0]
-        else:
-            return row["Street"]
+        try:
+            if row["Street"] == None or row["Street"] == np.nan:
+                i = row[text_col]
+                location_final = []
+                i = re.sub(r"\[.*?\]", "", i)
+                doc = Doc(i)
+                doc.segment(segmenter)
+                doc.tag_morph(morph_tagger)
+                doc.parse_syntax(syntax_parser)
+                doc.tag_ner(ner_tagger)
+                for span in doc.spans:
+                    span.normalize(morph_vocab)
+                location = list(filter(lambda x: x.type == "LOC", doc.spans))
+                for span in location:
+                    if (
+                        span.normal.lower()
+                        not in exceptions["Сокращенное наименование"]
+                        .str.lower()
+                        .values
+                    ):
+                        location_final.append(span)
+                location_final = [(span.text) for span in location_final]
+                if not location_final:
+                    return None
+                return location_final[0]
+            else:
+                return row["Street"]
+            
+        except ValueError:
+            return None
 
     @staticmethod
     def extract_building_num(text, street_name, number) -> string:
@@ -619,7 +623,7 @@ class Geocoder:
         df["Street"] = df[[text_column, "Street"]].progress_apply(
             lambda row: Geocoder.get_ner_address_natasha(
                 row, self.exceptions, text_column
-            ),
+            ) if ["Street"] else None,
             axis=1,
         )
 

@@ -45,6 +45,8 @@ pymorphy3 = "2.0.1"
 keybert = "0.8.3"
 pyarrow = "15.0.0"
 jupyter = "^1.0.0"
+testresources = "^2.0.1"
+rapidfuzz = "^3.9.0"
 
 
 [tool.poetry.group.test.dependencies]
@@ -64,3 +66,4 @@ line-length = 120
 [tool.isort]
 profile = 'black'
 line_length = 120
+
