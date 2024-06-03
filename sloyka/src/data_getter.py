@@ -326,25 +326,6 @@ class VKParser:
     TIMEOUT_LIMIT = 15
 
     @staticmethod
-<<<<<<< HEAD
-=======
-    def get_group_name(domain, accsess_token):
-        params = {
-        'group_id': domain,
-        'access_token': accsess_token,
-        'v': VKParser.API_VERISON
-    }
-        response = requests.get('https://api.vk.com/method/groups.getById', params=params) #передвинуть повыше
-        data = response.json()
-        if 'response' in data and data['response']:
-            group_name = data['response'][0]['name']
-            return pd.DataFrame({'group_name': [group_name]})
-        else:
-            print("Error while fetching group name:", data)
-            return pd.DataFrame({'group_name': [None]})
-
-    @staticmethod
->>>>>>> origin/feat/group_names
     def get_owner_id_by_domain(domain, access_token):
         """
     Get the owner ID of a VK group by its domain.
