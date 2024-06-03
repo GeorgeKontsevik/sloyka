@@ -45,14 +45,9 @@ pymorphy3 = "2.0.1"
 keybert = "0.8.3"
 pyarrow = "15.0.0"
 jupyter = "^1.0.0"
-<<<<<<< HEAD
-pyvis = "^0.3.2"
-
-=======
 testresources = "^2.0.1"
 rapidfuzz = "^3.9.0"
 osmapi = "^4.0.0"
->>>>>>> origin/feat/group_names
 
 [tool.poetry.group.test.dependencies]
 pytest = "7.4.3"
