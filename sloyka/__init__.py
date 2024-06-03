@@ -10,7 +10,12 @@ from .src import (
     Streets, 
     NER_parklike,
     VKParser,
+<<<<<<< HEAD
     Pipeline
+=======
+    City_services,
+    AreaMatcher
+>>>>>>> origin/feat/group_names
 )
 
 __all__ = [
@@ -22,7 +27,12 @@ __all__ = [
     "Streets", 
     "NER_parklike",
     "VKParser",
+<<<<<<< HEAD
     "Pipeline"
+=======
+    "City_services",
+    "AreaMatcher"
+>>>>>>> origin/feat/group_names
 ]
 
 logger.remove()

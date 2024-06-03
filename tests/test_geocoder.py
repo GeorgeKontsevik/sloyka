@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from sloyka import Geocoder
+from sloyka.src.geocoder import Geocoder
 
 osm_city_level: int = 5
 osm_city_name: str = "Санкт-Петербург"
