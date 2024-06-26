@@ -1,17 +1,16 @@
-from typing import List
 import re
-import pandas as pd
-import osmnx as ox
-from shapely.geometry import Point, Polygon, MultiPolygon
-from loguru import logger
-from natasha import MorphVocab
-from sloyka.src.utils.constants import NUM_CITY_OBJ
-from sloyka.src.geocoder.objects_address_extractor_by_rules import AddressExtractorExtra
-from sloyka.src.utils.data_getter.geo_data_getter import GeoDataGetter
-from rapidfuzz import fuzz
-import numpy as np
-
 import warnings
+from typing import List
+
+import numpy as np
+import pandas as pd
+from natasha import MorphVocab
+from rapidfuzz import fuzz
+from shapely.geometry import MultiPolygon, Point, Polygon
+
+from sloyka.src.geocoder.objects_address_extractor_by_rules import AddressExtractorExtra
+from sloyka.src.utils.constants import NUM_CITY_OBJ
+from sloyka.src.utils.data_getter.geo_data_getter import GeoDataGetter
 
 warnings.simplefilter("ignore")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -44,7 +43,9 @@ class OtherGeoObjects:
             {"place": ["square"]},
         ]
 
-        osm_dfs = [OtherGeoObjects.get_and_process_osm_data(osm_id, tags) for tags in tags_list]
+        osm_dfs = [
+            OtherGeoObjects.get_and_process_osm_data(osm_id, tags) for tags in tags_list
+        ]
         osm_combined_df = pd.concat(osm_dfs, axis=0)
         return osm_combined_df
 
@@ -89,13 +90,15 @@ class OtherGeoObjects:
                     other_geo_obj.append(part.type)
             if not other_geo_obj:
                 return other_geo_obj
-        except Exception as e:
+        except Exception:
             # logger.exception(f"Error extracting geo objects: {e}")
             return other_geo_obj
         return other_geo_obj
 
     @staticmethod
-    def restoration_of_normal_form(other_geo_obj, osm_combined_df, threshold=0.7) -> List[str]:
+    def restoration_of_normal_form(
+        other_geo_obj, osm_combined_df, threshold=0.7
+    ) -> List[str]:
         """
         This function compares the extracted location entity with an OSM array and returns a normalized form if the percentage of similarity is at least 70%.
         """
@@ -144,7 +147,9 @@ class OtherGeoObjects:
         for obj in num_obj_list:
             key = obj.split(" № ")[1]
             if key in num_obj_list_clear:
-                if len(obj.split(" № ")[0]) > len(num_obj_list_clear[key].split(" № ")[0]):
+                if len(obj.split(" № ")[0]) > len(
+                    num_obj_list_clear[key].split(" № ")[0]
+                ):
                     num_obj_list_clear[key] = obj
             else:
                 num_obj_list_clear[key] = obj
@@ -211,7 +216,9 @@ class OtherGeoObjects:
         df_obj["Numbers"] = pd.NA
         # osm_combined_df = OtherGeoObjects.run_osm_dfs(osm_id)
 
-        df_obj["other_geo_obj"] = df_obj[text_column].apply(OtherGeoObjects.extract_geo_obj)
+        df_obj["other_geo_obj"] = df_obj[text_column].apply(
+            OtherGeoObjects.extract_geo_obj
+        )
         df_obj["other_geo_obj_num"] = df_obj[text_column].apply(
             lambda x: OtherGeoObjects.find_num_city_obj(x, NUM_CITY_OBJ)
         )
@@ -222,7 +229,9 @@ class OtherGeoObjects:
         )
         df_obj = OtherGeoObjects.expand_toponym(df_obj)
 
-        df_obj["geometry"] = df_obj["other_geo_obj"].apply(lambda x: OtherGeoObjects.find_geometry(x, osm_combined_df))
+        df_obj["geometry"] = df_obj["other_geo_obj"].apply(
+            lambda x: OtherGeoObjects.find_geometry(x, osm_combined_df)
+        )
         df_obj["geo_obj_tag"] = df_obj["other_geo_obj"].apply(
             lambda x: OtherGeoObjects.find_geo_obj_tag(x, osm_combined_df)
         )

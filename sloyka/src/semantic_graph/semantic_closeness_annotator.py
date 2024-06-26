@@ -1,15 +1,18 @@
-import time
 import itertools
+import time
 
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 import torch
 from tqdm import tqdm
 
 
 def get_semantic_closeness(
-    self, data: pd.DataFrame or gpd.GeoDataFrame, column: str, similarity_filter: float = 0.75
-) -> pd.DataFrame or gpd.GeoDataFrame:
+    self,
+    data: pd.DataFrame | gpd.GeoDataFrame,
+    column: str,
+    similarity_filter: float = 0.75,
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     Calculate the semantic closeness between unique words in the specified column of the input DataFrame.
 
@@ -26,10 +29,18 @@ def get_semantic_closeness(
 
     unic_words = tuple(set(data[column]))
     words_tokens = tuple(
-        [self.tokenizer.encode(i, add_special_tokens=False, return_tensors="pt").to(self.device) for i in unic_words]
+        [
+            self.tokenizer.encode(i, add_special_tokens=False, return_tensors="pt").to(
+                self.device
+            )
+            for i in unic_words
+        ]
     )
     potential_new_nodes_embeddings = tuple(
-        [[unic_words[i], self.model(words_tokens[i]).last_hidden_state.mean(dim=1)] for i in range(len(unic_words))]
+        [
+            [unic_words[i], self.model(words_tokens[i]).last_hidden_state.mean(dim=1)]
+            for i in range(len(unic_words))
+        ]
     )
     new_nodes = []
 

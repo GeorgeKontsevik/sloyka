@@ -1,13 +1,12 @@
 # addr_extractor.py
 import warnings
 
-warnings.simplefilter("ignore")
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-from natasha.extractors import Match
-from natasha.extractors import Extractor
+from natasha.extractors import Extractor, Match
 
 from ..utils.data_processing.rule_for_natasha import ADDR_PART
+
+warnings.simplefilter("ignore")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 class AddrExtractorError(Exception):
@@ -54,6 +53,7 @@ class AddressExtractorExtra(Extractor):
         parts = [_.fact for _ in matches]
         # self.logger.debug(f"Extracted address parts: {parts}")
         try:
+            # FIXME: Undefined name `obj`
             return Match(start, stop, obj.Addr(parts))
         except Exception as e:
             # self.logger.error(f"Error creating Match object: {e}")

@@ -1,6 +1,7 @@
-import networkx as nx
-import folium
 import random
+
+import folium
+import networkx as nx
 from folium.plugins import MarkerCluster
 
 
@@ -74,7 +75,7 @@ def draw_graph_folium(graph_path, output_file=None):
         mc.add_to(m)
 
     folium.LayerControl().add_to(m)
-    if not output_file is None:
+    if output_file is not None:
         m.save(output_file)
 
     return m

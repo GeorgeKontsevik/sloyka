@@ -11,25 +11,14 @@ A class for parsing and working with VK comments and posts. Combines posts and c
 A class for working with street data.
 
 """
-import osmnx as ox
-import geopandas as gpd
-import pandas as pd
-from sloyka.src.utils.constants import (
-    GLOBAL_CRS,
-    GLOBAL_METRIC_CRS,
-)
-from shapely.ops import transform
-from tqdm import tqdm
-import requests
-import sys
+
 import datetime
-import time
-import osm2geojson
 import random
-from typing import List, Optional
-from osmapi import OsmApi
-import networkx as nx
-from loguru import logger
+import time
+
+import pandas as pd
+import requests
+from tqdm import tqdm
 
 
 class VKParser:
@@ -40,8 +29,14 @@ class VKParser:
 
     @staticmethod
     def get_group_name(domain, accsess_token):
-        params = {"group_id": domain, "access_token": accsess_token, "v": VKParser.API_VERISON}
-        response = requests.get("https://api.vk.com/method/groups.getById", params=params)  # передвинуть повыше
+        params = {
+            "group_id": domain,
+            "access_token": accsess_token,
+            "v": VKParser.API_VERISON,
+        }
+        response = requests.get(
+            "https://api.vk.com/method/groups.getById", params=params
+        )  # передвинуть повыше
         data = response.json()
         if "response" in data and data["response"]:
             group_name = data["response"][0]["name"]
@@ -122,14 +117,18 @@ class VKParser:
         """
         subcomments = []
 
-        response = requests.get("https://api.vk.com/method/wall.getComments", params=params)
+        response = requests.get(
+            "https://api.vk.com/method/wall.getComments", params=params
+        )
         # print(response.json().keys())
         time.sleep(random.random())
         data = response.json()
 
         if "response" in data:
             for item in data["response"]["items"]:
-                item["date"] = datetime.datetime.utcfromtimestamp(item["date"]).strftime("%Y-%m-%d %H:%M:%S")
+                item["date"] = datetime.datetime.utcfromtimestamp(
+                    item["date"]
+                ).strftime("%Y-%m-%d %H:%M:%S")
                 if "likes" in item:
                     item["likes.count"] = item["likes"]["count"]
                 subcomments.append(item)
@@ -160,7 +159,9 @@ class VKParser:
 
         comments = []
 
-        response = requests.get("https://api.vk.com/method/wall.getComments", params=params)
+        response = requests.get(
+            "https://api.vk.com/method/wall.getComments", params=params
+        )
         # print(response.json().keys())
         time.sleep(random.random())
         data = response.json()
@@ -169,13 +170,17 @@ class VKParser:
             for item in data["response"]["items"]:
                 if item["text"] == "":
                     continue
-                item["date"] = datetime.datetime.utcfromtimestamp(item["date"]).strftime("%Y-%m-%d %H:%M:%S")
+                item["date"] = datetime.datetime.utcfromtimestamp(
+                    item["date"]
+                ).strftime("%Y-%m-%d %H:%M:%S")
                 if "likes" in item:
                     item["likes.count"] = item["likes"]["count"]
                 comments.append(item)
                 if item["thread"]["count"] > 0:
                     params["comment_id"] = item["id"]
-                    subcomments = VKParser.get_subcomments(owner_id, post_id, access_token, params)
+                    subcomments = VKParser.get_subcomments(
+                        owner_id, post_id, access_token, params
+                    )
                     comments.extend(subcomments)
         return comments
 
@@ -191,11 +196,15 @@ class VKParser:
             DataFrame: A DataFrame containing specific columns from the input comments.
         """
         df = pd.DataFrame(comments)
-        df = df[["id", "from_id", "date", "text", "post_id", "parents_stack", "likes.count"]]
+        df = df[
+            ["id", "from_id", "date", "text", "post_id", "parents_stack", "likes.count"]
+        ]
         return df
 
     @staticmethod
-    def run_posts(domain, access_token, cutoff_date, number_of_messages=float("inf"), step=50):
+    def run_posts(
+        domain, access_token, cutoff_date, number_of_messages=float("inf"), step=50
+    ):
         """
         A function to retrieve posts from a social media API based on specified parameters.
 
@@ -209,7 +218,7 @@ class VKParser:
         Returns:
             pandas.DataFrame: A DataFrame containing the retrieved posts.
         """
-    
+
         domain = domain
         offset = 0
         all_posts = []
@@ -226,21 +235,35 @@ class VKParser:
                     "domain": domain,
                     "count": step,
                     "offset": offset,
-                }, timeout=600
+                },
+                timeout=600,
             )
             if response.ok:
                 # print(response.json().keys())
                 data = response.json()["response"]["items"]
                 offset += step
                 current_posts = pd.json_normalize(data)
-                current_posts = current_posts[["date", "id", "text", "views.count", "likes.count", "reposts.count"]]
+                current_posts = current_posts[
+                    [
+                        "date",
+                        "id",
+                        "text",
+                        "views.count",
+                        "likes.count",
+                        "reposts.count",
+                    ]
+                ]
                 current_posts["date"] = [
-                    datetime.datetime.fromtimestamp(current_posts["date"][i]) for i in range(len(current_posts["date"]))
+                    datetime.datetime.fromtimestamp(current_posts["date"][i])
+                    for i in range(len(current_posts["date"]))
                 ]
                 current_posts["type"] = "post"
                 all_posts.append(current_posts)
                 print(current_posts.date.min())
-                if any(current_posts["date"] < datetime.datetime.strptime(cutoff_date, "%Y-%m-%d")):
+                if any(
+                    current_posts["date"]
+                    < datetime.datetime.strptime(cutoff_date, "%Y-%m-%d")
+                ):
                     print("posts downloaded")
                     break
             else:
@@ -251,14 +274,41 @@ class VKParser:
         df_posts["text"] = df_posts["text"].str.replace(r"\n", "", regex=True)
         df_posts["link"] = df_posts["text"].str.extract(r"(https://\S+)")
         return df_posts
-    
+
     @staticmethod
-    def run_comments(domain, post_ids, access_token):
+    def run_comments(domain, post_ids, access_token, n_attempts=5):
+        """
+        Retrieves comments for multiple posts specified by their IDs and returns them as a DataFrame.
+
+        Parameters:
+            domain (str): The domain or group name.
+            post_ids (list): List of post IDs to retrieve comments for.
+            access_token (str): The access token for authentication.
+            n_attempts (int): The number of retry attempts in case of failures. Defaults to 5.
+
+        Returns:
+            pandas.DataFrame: A DataFrame containing the retrieved comments with additional metadata.
+        """
         owner_id = VKParser.get_owner_id_by_domain(domain, access_token)
         all_comments = []
         for post_id in tqdm(post_ids):
-            comments = VKParser.get_comments(owner_id, post_id, access_token)
-            all_comments.extend(comments)
+            attempts = 0
+            while attempts < n_attempts:
+                try:
+                    comments = VKParser.get_comments(owner_id, post_id, access_token)
+                    all_comments.extend(comments)
+                    break  # Exit the retry loop if successful
+                except requests.exceptions.Timeout:
+                    print(f"Timeout error occurred for post_id {post_id}. Retrying...")
+                    attempts += 1
+                    time.sleep(2**attempts)  # Exponential backoff
+                except requests.exceptions.RequestException as e:
+                    print(f"An error occurred: {e}. Retrying...")
+                    attempts += 1
+                    time.sleep(2**attempts)
+            else:
+                print(f"Failed to retrieve comments for post_id {post_id}.")
+
         df = VKParser.comments_to_dataframe(all_comments)
         df["type"] = "comment"
         df = df.reset_index(drop=True)
@@ -266,7 +316,9 @@ class VKParser:
         return df
 
     @staticmethod
-    def run_parser(domain, access_token, cutoff_date, number_of_messages=float("inf"), step=100):
+    def run_parser(
+        domain, access_token, cutoff_date, number_of_messages=float("inf"), step=100
+    ):
         """
         Runs the parser with the given parameters and returns a combined DataFrame of posts and comments.
 
@@ -278,11 +330,21 @@ class VKParser:
         :return: A combined DataFrame of posts and comments.
         """
         owner_id = VKParser.get_owner_id_by_domain(domain, access_token)
-        df_posts = VKParser.run_posts(domain=owner_id, access_token=access_token, step=step, cutoff_date=cutoff_date, number_of_messages=number_of_messages)
+        df_posts = VKParser.run_posts(
+            domain=owner_id,
+            access_token=access_token,
+            step=step,
+            cutoff_date=cutoff_date,
+            number_of_messages=number_of_messages,
+        )
         post_ids = df_posts["id"].tolist()
 
-        df_comments = VKParser.run_comments(domain=owner_id, post_ids=post_ids, access_token=access_token)
-        df_comments.loc[df_comments["parents_stack"].apply(lambda x: len(x) > 0), "type"] = "reply"
+        df_comments = VKParser.run_comments(
+            domain=owner_id, post_ids=post_ids, access_token=access_token
+        )
+        df_comments.loc[
+            df_comments["parents_stack"].apply(lambda x: len(x) > 0), "type"
+        ] = "reply"
         for i in range(len(df_comments)):
             tmp = df_comments["parents_stack"].iloc[i]
             if tmp is not None:

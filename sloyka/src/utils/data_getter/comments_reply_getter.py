@@ -1,6 +1,7 @@
-import requests
 from datetime import datetime
+
 import pandas as pd
+import requests
 
 
 class CommentsReply:
@@ -28,18 +29,24 @@ class CommentsReply:
 
         comments = []
 
-        response = requests.get("https://api.vk.com/method/wall.getComments", params=params, timeout=60)
+        response = requests.get(
+            "https://api.vk.com/method/wall.getComments", params=params, timeout=60
+        )
         data = response.json()
 
         if "response" in data:
             for item in data["response"]["items"]:
-                item["date"] = datetime.utcfromtimestamp(item["date"]).strftime("%Y-%m-%d %H:%M:%S")
+                item["date"] = datetime.utcfromtimestamp(item["date"]).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
                 if "likes" in item:
                     item["likes_count"] = item["likes"]["count"]
                 comments.append(item)
                 if item["thread"]["count"] > 0:
                     params["comment_id"] = item["id"]
-                    subcomments = self.get_subcomments(owner_id, post_id, access_token, params)
+                    subcomments = self.get_subcomments(
+                        owner_id, post_id, access_token, params
+                    )
                     comments.extend(subcomments)
 
         return comments
@@ -59,12 +66,16 @@ class CommentsReply:
         """
         subcomments = []
 
-        response = requests.get("https://api.vk.com/method/wall.getComments", params=params)
+        response = requests.get(
+            "https://api.vk.com/method/wall.getComments", params=params
+        )
         data = response.json()
 
         if "response" in data:
             for item in data["response"]["items"]:
-                item["date"] = datetime.utcfromtimestamp(item["date"]).strftime("%Y-%m-%d %H:%M:%S")
+                item["date"] = datetime.utcfromtimestamp(item["date"]).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
                 if "likes" in item:
                     item["likes_count"] = item["likes"]["count"]
                 subcomments.append(item)

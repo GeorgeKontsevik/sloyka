@@ -1,13 +1,15 @@
 import re
 
-import pandas as pd
 import geopandas as gpd
-import osmnx as ox
 import networkx as nx
+import osmnx as ox
+import pandas as pd
 
 
 @staticmethod
-def clean_from_dublicates(data: pd.DataFrame or gpd.GeoDataFrame, id_column: str) -> pd.DataFrame or gpd.GeoDataFrame:
+def clean_from_dublicates(
+    data: pd.DataFrame | gpd.GeoDataFrame, id_column: str
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     A function to clean a DataFrame from duplicates based on specified columns.
 
@@ -27,7 +29,9 @@ def clean_from_dublicates(data: pd.DataFrame or gpd.GeoDataFrame, id_column: str
 
 
 @staticmethod
-def clean_from_digits(data: pd.DataFrame or gpd.GeoDataFrame, text_column: str) -> pd.DataFrame or gpd.GeoDataFrame:
+def clean_from_digits(
+    data: pd.DataFrame | gpd.GeoDataFrame, text_column: str
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     Removes digits from the text in the specified column of the input DataFrame.
 
@@ -50,8 +54,11 @@ def clean_from_digits(data: pd.DataFrame or gpd.GeoDataFrame, text_column: str) 
 
 @staticmethod
 def clean_from_toponyms(
-    data: pd.DataFrame or gpd.GeoDataFrame, text_column: str, name_column: str, toponym_type_column: str
-) -> pd.DataFrame or gpd.GeoDataFrame:
+    data: pd.DataFrame | gpd.GeoDataFrame,
+    text_column: str,
+    name_column: str,
+    toponym_type_column: str,
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     Clean the text in the specified text column by removing any words that match the toponyms in the name
     and toponym columns.
@@ -70,7 +77,10 @@ def clean_from_toponyms(
     for i in range(len(data)):
         text = str(data[text_column].iloc[i]).lower()
         word_list = text.split()
-        toponyms = [str(data[name_column].iloc[i]).lower(), str(data[toponym_type_column].iloc[i]).lower()]
+        toponyms = [
+            str(data[name_column].iloc[i]).lower(),
+            str(data[toponym_type_column].iloc[i]).lower(),
+        ]
 
         text = " ".join([j for j in word_list if j not in toponyms])
 
@@ -80,7 +90,9 @@ def clean_from_toponyms(
 
 
 @staticmethod
-def clean_from_links(data: pd.DataFrame or gpd.GeoDataFrame, text_column: str) -> pd.DataFrame or gpd.GeoDataFrame:
+def clean_from_links(
+    data: pd.DataFrame | gpd.GeoDataFrame, text_column: str
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     Clean the text in the specified text column by removing links and specific patterns.
 
@@ -107,13 +119,14 @@ def clean_from_links(data: pd.DataFrame or gpd.GeoDataFrame, text_column: str) -
 
 
 @staticmethod
-def fill_empty_toponym(data: pd.DataFrame or gpd.GeoDataFrame, toponym_column: str):
+def fill_empty_toponym(data: pd.DataFrame | gpd.GeoDataFrame, toponym_column: str):
     for i in range(len(data)):
         check = data[toponym_column].iloc[i]
         if check == "":
             data.at[i, toponym_column] = None
 
     return data
+
 
 @staticmethod
 def graph_to_gdf(G_drive: nx.MultiDiGraph) -> gpd.GeoDataFrame:

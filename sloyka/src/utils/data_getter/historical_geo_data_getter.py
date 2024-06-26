@@ -1,19 +1,18 @@
+import datetime
+import sys
+from typing import Optional
 
-
-
-import osmnx as ox
 import geopandas as gpd
+import osmnx as ox
 import pandas as pd
+from loguru import logger
+from osmapi import OsmApi
+from tqdm import tqdm
+
 from sloyka.src.utils.constants import (
     GLOBAL_CRS,
     GLOBAL_METRIC_CRS,
 )
-from tqdm import tqdm
-import sys
-import datetime
-from typing import Optional
-from osmapi import OsmApi
-from loguru import logger
 
 
 class HistGeoDataGetter:
@@ -38,7 +37,15 @@ class HistGeoDataGetter:
         osm_id: int,
         tags: dict,
         osm_type="R",
-        selected_columns=["tag", "key", "element_type", "osmid", "name", "geometry", "centroid"],
+        selected_columns=[
+            "tag",
+            "key",
+            "element_type",
+            "osmid",
+            "name",
+            "geometry",
+            "centroid",
+        ],
         date: Optional[str] = None,
     ) -> gpd.GeoDataFrame:
         """
@@ -82,11 +89,13 @@ class HistGeoDataGetter:
                 if object_history:
                     first_version = list(object_history.values())[0]
                     timestamp = int(first_version["timestamp"].timestamp())
-                    creation_timestamp = datetime.datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+                    creation_timestamp = datetime.datetime.utcfromtimestamp(
+                        timestamp
+                    ).strftime("%Y-%m-%d %H:%M:%S")
                     timestamps.append(creation_timestamp)
                 else:
                     timestamps.append(None)
-            except Exception as e:
+            except Exception:
                 logger.exception(f"Error fetching timestamp for osmid {osmid}")
                 timestamps.append(None)
 
@@ -119,7 +128,9 @@ class HistGeoDataGetter:
         gdf["centroid"] = gdf["geometry"]
         gdf["key"] = tag
 
-        tmpgdf = ox.projection.project_gdf(gdf, to_crs=GLOBAL_METRIC_CRS, to_latlong=False)
+        tmpgdf = ox.projection.project_gdf(
+            gdf, to_crs=GLOBAL_METRIC_CRS, to_latlong=False
+        )
         tmpgdf["centroid"] = tmpgdf["geometry"].centroid
         tmpgdf = tmpgdf.to_crs(GLOBAL_CRS)
         gdf["centroid"] = tmpgdf["centroid"]

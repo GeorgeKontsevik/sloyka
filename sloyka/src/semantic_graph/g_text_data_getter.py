@@ -1,8 +1,9 @@
 import re
-import networkx as nx
-import pymorphy3
+
 import geopandas as gpd
+import networkx as nx
 import pandas as pd
+import pymorphy3
 
 
 @staticmethod
@@ -58,7 +59,9 @@ def get_coordinates(
     for i in toponyms_list:
         if i in all_toponyms_list:
             # index = all_toponyms_list.index(i)
-            G.nodes[i]["Location"] = str(geocoded_data[location_column].iloc[all_toponyms_list.index(i)])
+            G.nodes[i]["Location"] = str(
+                geocoded_data[location_column].iloc[all_toponyms_list.index(i)]
+            )
 
     for i in toponyms_list:
         if i in all_toponyms_list:
@@ -72,7 +75,10 @@ def get_coordinates(
 
 @staticmethod
 def get_text_ids(
-    G: nx.classes.graph.Graph, filtered_data: pd.DataFrame or gpd.GeoDataFrame, toponym_column: str, text_id_column: str
+    G: nx.classes.graph.Graph,
+    filtered_data: pd.DataFrame | gpd.GeoDataFrame,
+    toponym_column: str,
+    text_id_column: str,
 ) -> nx.classes.graph.Graph:
     """
     Update the text_ids attribute of nodes in the graph based on the provided filtered data.
@@ -97,7 +103,9 @@ def get_text_ids(
             ids = [str(k) for k in ids]
 
             if "text_ids" in G.nodes[name].keys():
-                G.nodes[name]["text_ids"] = G.nodes[name]["text_ids"] + "," + ",".join(ids)
+                G.nodes[name]["text_ids"] = (
+                    G.nodes[name]["text_ids"] + "," + ",".join(ids)
+                )
             else:
                 G.nodes[name]["text_ids"] = ",".join(ids)
 
@@ -106,7 +114,10 @@ def get_text_ids(
 
 @staticmethod
 def get_house_text_id(
-    G: nx.classes.graph.Graph, geocoded_data: gpd.GeoDataFrame, text_id_column: str, text_column: str
+    G: nx.classes.graph.Graph,
+    geocoded_data: gpd.GeoDataFrame,
+    text_id_column: str,
+    text_column: str,
 ) -> nx.classes.graph.Graph:
     """
     Get house text ids from geocoded data and assign them to the graph nodes.
@@ -126,7 +137,9 @@ def get_house_text_id(
             if re.search("\d+", i):
                 id_list = G.nodes[i]["text_ids"].split(",")
                 id_list = [int(j) for j in id_list]
-                text = geocoded_data[text_column].loc[geocoded_data[text_id_column] == id_list[0]]
+                text = geocoded_data[text_column].loc[
+                    geocoded_data[text_id_column] == id_list[0]
+                ]
 
                 G.nodes[i]["extracted_from"] = text.iloc[0]
 

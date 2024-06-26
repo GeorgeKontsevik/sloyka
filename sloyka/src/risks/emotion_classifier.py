@@ -3,16 +3,17 @@ This module contains the EmotionClassifiers class, which is designed to categori
 It uses a Huggingface transformer model trained on Bert_Large by default.
 The EmotionClassifiers class has the following method:
 @method:recognize_emotion: Adding an emotion category.
-@method:recognize_average_emotion_from_multiple_models: Adding an average emotion category or the most likely emotion 
+@method:recognize_average_emotion_from_multiple_models: Adding an average emotion category or the most likely emotion
 category using multiple models.
 """
 
-from aniemore.recognizers.text import TextRecognizer
-from aniemore.models import HuggingFaceModel
-import torch
-import pandas as pd
-from tqdm import tqdm
 import gc
+
+import pandas as pd
+import torch
+from aniemore.models import HuggingFaceModel
+from aniemore.recognizers.text import TextRecognizer
+from tqdm import tqdm
 
 
 class EmotionRecognizer:
@@ -35,7 +36,11 @@ class EmotionRecognizer:
     """
 
     def __init__(self, model_name=HuggingFaceModel.Text.Bert_Large, device=None):
-        self.device = device if device is not None else ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = (
+            device
+            if device is not None
+            else ("cuda" if torch.cuda.is_available() else "cpu")
+        )
         self.model_name = model_name
 
         # Define the default model names to avoid repeated initialization
@@ -54,7 +59,9 @@ class EmotionRecognizer:
         emotion = recognizer.recognize(text, return_single_label=True)
         return emotion
 
-    def recognize_average_emotion_from_multiple_models(self, df, text_column, models=None, average=True):
+    def recognize_average_emotion_from_multiple_models(
+        self, df, text_column, models=None, average=True
+    ):
         """
         Calculate the prevailing emotion using multiple models for a DataFrame column.
         """
@@ -70,26 +77,43 @@ class EmotionRecognizer:
 
         # Initialize scores DataFrame
         scores = pd.DataFrame(
-            0, index=df.index, columns=["happiness", "sadness", "anger", "fear", "disgust", "enthusiasm", "neutral"]
+            0,
+            index=df.index,
+            columns=[
+                "happiness",
+                "sadness",
+                "anger",
+                "fear",
+                "disgust",
+                "enthusiasm",
+                "neutral",
+            ],
         )
 
         # Process each model one by one with progress bar
         for model_name in tqdm(models, desc="Processing models"):
             try:
-                print(f"Clearing cache and collecting garbage before loading model: {model_name}")
+                print(
+                    f"Clearing cache and collecting garbage before loading model: {model_name}"
+                )
                 torch.cuda.empty_cache()
                 gc.collect()
 
                 print(f"Loading model: {model_name}")
                 recognizer = TextRecognizer(model=model_name, device=self.device)
-                model_results = [recognizer.recognize(text, return_single_label=False) for text in df[text_column]]
+                model_results = [
+                    recognizer.recognize(text, return_single_label=False)
+                    for text in df[text_column]
+                ]
 
                 for idx, result in enumerate(model_results):
                     for emotion, score in result.items():
                         if average:
                             scores.at[df.index[idx], emotion] += score
                         else:
-                            scores.at[df.index[idx], emotion] = max(scores.at[df.index[idx], emotion], score)
+                            scores.at[df.index[idx], emotion] = max(
+                                scores.at[df.index[idx], emotion], score
+                            )
 
                 # Удаление модели из памяти
                 del recognizer

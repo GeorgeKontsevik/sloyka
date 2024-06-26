@@ -1,36 +1,35 @@
-import pandas as pd
-import re
-from tqdm import tqdm
-from loguru import logger
-from typing import Tuple, List, Optional
-
-import string
 import math
-from typing import Optional
-from loguru import logger
-from flair.data import Sentence
+import re
+import string
+from typing import List, Optional, Tuple
+
+import pandas as pd
 
 # Initialize morphological analyzer (use the correct library for your context)
 import pymorphy2
+from flair.data import Sentence
+from loguru import logger
+from tqdm import tqdm
+
 morph = pymorphy2.MorphAnalyzer()
 
 from sloyka.src.geocoder.text_address_extractor_by_rules import NatashaExtractor
 from sloyka.src.utils.constants import (
-    START_INDEX_POSITION,
-    REPLACEMENT_DICT,
-    TARGET_TOPONYMS,
     END_INDEX_POSITION,
-    SCORE_THRESHOLD
+    REPLACEMENT_DICT,
+    SCORE_THRESHOLD,
+    START_INDEX_POSITION,
+    TARGET_TOPONYMS,
 )
 
 
 class StreetExtractor:
-    
     extractor = NatashaExtractor()
 
     @staticmethod
-    def process_pipeline(df: pd.DataFrame, text_column: str, classifier) -> pd.DataFrame:
-
+    def process_pipeline(
+        df: pd.DataFrame, text_column: str, classifier
+    ) -> pd.DataFrame:
         local_df = df.copy()
         """
         Execute the address extraction pipeline on the DataFrame.
@@ -45,29 +44,32 @@ class StreetExtractor:
         texts = StreetExtractor._preprocess_text_column(local_df, text_column)
         extracted_streets = StreetExtractor._extract_streets(texts, classifier)
         refined_streets = StreetExtractor._refine_street_data(extracted_streets)
-        building_numbers = StreetExtractor._extract_building_numbers(texts, refined_streets)
+        building_numbers = StreetExtractor._extract_building_numbers(
+            texts, refined_streets
+        )
         toponyms = StreetExtractor._extract_toponyms(texts, refined_streets)
 
         # Combine results into a DataFrame
-        processed_df = pd.DataFrame({
-            text_column: texts,
-            'Street': refined_streets,
-            'Numbers': building_numbers,
-            'Toponyms': toponyms
-        })
+        processed_df = pd.DataFrame(
+            {
+                text_column: texts,
+                "Street": refined_streets,
+                "Numbers": building_numbers,
+                "Toponyms": toponyms,
+            }
+        )
 
         StreetExtractor._check_df_len_didnt_change(local_df, processed_df)
-        
+
         return processed_df
-    
+
     @staticmethod
     def _check_df_len_didnt_change(df1, df2):
         try:
             assert len(df1) == len(df2)
         except Exception as e:
-            logger.critical('dfs lengths differ')
+            logger.critical("dfs lengths differ")
             raise e
-
 
     @staticmethod
     def _preprocess_text_column(df: pd.DataFrame, text_column: str) -> List[str]:
@@ -89,7 +91,9 @@ class StreetExtractor:
             return []
 
     @staticmethod
-    def _extract_streets(texts: List[str], classifier) -> List[Tuple[Optional[str], Optional[float]]]:
+    def _extract_streets(
+        texts: List[str], classifier
+    ) -> List[Tuple[Optional[str], Optional[float]]]:
         """
         Extract street names from the text column using NER model.
 
@@ -103,14 +107,18 @@ class StreetExtractor:
         extracted_streets = []
         for text in tqdm(texts):
             try:
-                extracted_streets.append(StreetExtractor.extract_ner_street(text, classifier))
+                extracted_streets.append(
+                    StreetExtractor.extract_ner_street(text, classifier)
+                )
             except Exception as e:
                 logger.warning(f"Error extracting NER street from text '{text}': {e}")
                 extracted_streets.append((None, None))
         return extracted_streets
 
     @staticmethod
-    def _refine_street_data(street_data: List[Tuple[Optional[str], Optional[float]]]) -> List[Optional[str]]:
+    def _refine_street_data(
+        street_data: List[Tuple[Optional[str], Optional[float]]],
+    ) -> List[Optional[str]]:
         """
         Refine street data by normalizing and cleaning up street names.
 
@@ -152,7 +160,9 @@ class StreetExtractor:
             return ""
 
     @staticmethod
-    def _extract_building_numbers(texts: List[str], streets: List[Optional[str]]) -> List[Optional[str]]:
+    def _extract_building_numbers(
+        texts: List[str], streets: List[Optional[str]]
+    ) -> List[Optional[str]]:
         """
         Extract building numbers from the text data.
 
@@ -167,9 +177,13 @@ class StreetExtractor:
         for text, street in zip(texts, streets):
             if street:
                 try:
-                    building_numbers.append(StreetExtractor._extract_building_number(text, street))
+                    building_numbers.append(
+                        StreetExtractor._extract_building_number(text, street)
+                    )
                 except Exception as e:
-                    logger.warning(f"Error extracting building number from text '{text}' with street '{street}': {e}")
+                    logger.warning(
+                        f"Error extracting building number from text '{text}' with street '{street}': {e}"
+                    )
                     building_numbers.append(None)
             else:
                 building_numbers.append(None)
@@ -191,11 +205,15 @@ class StreetExtractor:
             numbers = " ".join(re.findall(r"\d+", text))
             return StreetExtractor.extract_building_num(text, street, numbers)
         except Exception as e:
-            logger.warning(f"Error in _extract_building_number with text '{text}' and street '{street}': {e}")
+            logger.warning(
+                f"Error in _extract_building_number with text '{text}' and street '{street}': {e}"
+            )
             return ""
 
     @staticmethod
-    def _extract_toponyms(texts: List[str], streets: List[Optional[str]]) -> List[Optional[str]]:
+    def _extract_toponyms(
+        texts: List[str], streets: List[Optional[str]]
+    ) -> List[Optional[str]]:
         """
         Extract toponyms from the text data.
 
@@ -212,12 +230,13 @@ class StreetExtractor:
                 try:
                     toponyms.append(StreetExtractor.extract_toponym(text, street))
                 except Exception as e:
-                    logger.warning(f"Error extracting toponym from text '{text}' with street '{street}': {e}")
+                    logger.warning(
+                        f"Error extracting toponym from text '{text}' with street '{street}': {e}"
+                    )
                     toponyms.append(None)
             else:
                 toponyms.append(None)
         return toponyms
-
 
     @staticmethod
     def extract_toponym(text: str, street_name: str) -> Optional[str]:
@@ -253,7 +272,9 @@ class StreetExtractor:
             return toponym
 
         except Exception as e:
-            logger.warning(f"Error in extract_toponym with text '{text}' and street_name '{street_name}': {e}")
+            logger.warning(
+                f"Error in extract_toponym with text '{text}' and street_name '{street_name}': {e}"
+            )
             return None
 
     @staticmethod
@@ -338,13 +359,16 @@ class StreetExtractor:
             if not positions:
                 return ""
 
-            building_number = StreetExtractor._search_building_number(words, positions[0])
+            building_number = StreetExtractor._search_building_number(
+                words, positions[0]
+            )
             return building_number
 
         except Exception as e:
-            logger.warning(f"Error in extract_building_num with text '{text}', street_name '{street_name}', number '{number}': {e}")
+            logger.warning(
+                f"Error in extract_building_num with text '{text}', street_name '{street_name}', number '{number}': {e}"
+            )
             return ""
-
 
     @staticmethod
     def _find_street_name_positions(words: List[str], street_name: str) -> List[int]:
@@ -395,26 +419,26 @@ class StreetExtractor:
         """
         return any(character.isdigit() for character in word) and len(word) <= 3
 
-#---------
+    # ---------
     @staticmethod
     def extract_ner_street(text: str, classifier) -> pd.Series:
         """
         Extract street addresses from text using a pre-trained custom NER model.
 
-        This function processes text by removing unnecessary content, applies a custom NER model 
+        This function processes text by removing unnecessary content, applies a custom NER model
         to extract mentioned addresses, and returns the address with a confidence score.
 
         Args:
             text (str): The input text to process and extract addresses from.
 
         Returns:
-            pd.Series: A Series containing the extracted address and confidence score, 
+            pd.Series: A Series containing the extracted address and confidence score,
                     or [None, None] if extraction fails or the score is below the threshold.
         """
         try:
             cleaned_text = StreetExtractor._clean_text(text)
             sentence = Sentence(cleaned_text)
-            
+
             # Predict entities using the classifier
             classifier.predict(sentence)
 
@@ -424,9 +448,13 @@ class StreetExtractor:
                 address = StreetExtractor.extractor.get_ner_address_natasha(text)
                 if address:
                     score = 1
-            
+
             # Return the result if the score is above the threshold
-            return pd.Series([address, score] if score is not None and score > SCORE_THRESHOLD else [None, None])
+            return pd.Series(
+                [address, score]
+                if score is not None and score > SCORE_THRESHOLD
+                else [None, None]
+            )
 
         except Exception as e:
             logger.warning(f"Error in extract_ner_street with text '{text}': {e}")
@@ -450,7 +478,9 @@ class StreetExtractor:
             return text
 
     @staticmethod
-    def _extract_address_and_score(sentence: Sentence) -> Tuple[Optional[str], Optional[float]]:
+    def _extract_address_and_score(
+        sentence: Sentence,
+    ) -> Tuple[Optional[str], Optional[float]]:
         """
         Extract address and score from the NER model's predictions.
 
@@ -486,7 +516,7 @@ class StreetExtractor:
         try:
             return label_value.split("]: ")[1].split("/")[0].replace('"', "")
         except IndexError as e:
-            logger.warning(f"Error in _parse_address with label value '{label_value}': {e}")
+            logger.warning(
+                f"Error in _parse_address with label value '{label_value}': {e}"
+            )
             return ""
-
-

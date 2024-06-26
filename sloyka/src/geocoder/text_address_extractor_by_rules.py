@@ -1,26 +1,21 @@
 import re
-import numpy as np
 from typing import Optional
+
 from loguru import logger
 from natasha import (
-    Segmenter,
+    Doc,
     MorphVocab,
     NewsEmbedding,
     NewsMorphTagger,
-    NewsSyntaxParser,
     NewsNERTagger,
-    Doc,
+    NewsSyntaxParser,
+    Segmenter,
 )
 
-import pandas as pd
-import pymorphy2
-
-from sloyka.src.utils.constants import (
-    EXCEPTIONS_CITY_COUNTRY)
+from sloyka.src.utils.constants import EXCEPTIONS_CITY_COUNTRY
 
 
 class NatashaExtractor:
-
     def __init__(self):
         NatashaExtractor.segmenter = Segmenter()
         NatashaExtractor.morph_vocab = MorphVocab()
@@ -89,7 +84,6 @@ class NatashaExtractor:
             Doc: The processed Natasha Doc object.
         """
         try:
-
             doc = Doc(text)
             doc.segment(NatashaExtractor.segmenter)
             doc.tag_morph(NatashaExtractor.morph_tagger)
@@ -101,7 +95,7 @@ class NatashaExtractor:
         except Exception as e:
             logger.warning(f"Error processing text with Natasha: {e}")
             return Doc("")
-        
+
     @staticmethod
     def _extract_location_spans(doc: Doc) -> list:
         """
@@ -131,8 +125,11 @@ class NatashaExtractor:
             list: Filtered list of location texts.
         """
         try:
-            return [span.text for span in spans if span.normal.lower() not in map(str.lower, EXCEPTIONS_CITY_COUNTRY)]
+            return [
+                span.text
+                for span in spans
+                if span.normal.lower() not in map(str.lower, EXCEPTIONS_CITY_COUNTRY)
+            ]
         except Exception as e:
             logger.warning(f"Error filtering locations: {e}")
             return []
-

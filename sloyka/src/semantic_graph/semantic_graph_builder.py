@@ -20,22 +20,22 @@ toponym columns.
 Creates a new DataFrame by aggregating the data based on the provided text and toponyms columns.
 """
 
-import nltk
-import pandas as pd
 import geopandas as gpd
 import networkx as nx
-from transformers import BertTokenizer, BertModel  # type: ignore
+import nltk
+import pandas as pd
+from transformers import BertModel, BertTokenizer  # type: ignore
 
+from ..utils.data_preprocessing.preprocessor import (
+    clean_from_digits,
+    clean_from_dublicates,
+    clean_from_links,
+    clean_from_toponyms,
+)
 from .g_attrs_adder import add_attributes
+from .g_text_data_getter import get_coordinates, get_tag, get_text_ids
 from .keyword_extracter import extract_keywords
 from .semantic_closeness_annotator import get_semantic_closeness
-from .g_text_data_getter import get_tag, get_coordinates, get_text_ids
-from ..utils.data_preprocessing.preprocessor import (
-    clean_from_dublicates,
-    clean_from_digits,
-    clean_from_toponyms,
-    clean_from_links,
-)
 
 nltk.download("stopwords")
 
@@ -56,7 +56,10 @@ class Semgraph:
     """
 
     def __init__(
-        self, bert_name: str = "DeepPavlov/rubert-base-cased", language: str = "russian", device: str = "cpu"
+        self,
+        bert_name: str = "DeepPavlov/rubert-base-cased",
+        language: str = "russian",
+        device: str = "cpu",
     ) -> None:
         self.language = language
         self.device = device
@@ -66,7 +69,9 @@ class Semgraph:
 
     @staticmethod
     def convert_df_to_edge_df(
-        data: pd.DataFrame | gpd.GeoDataFrame, toponym_column: str, word_info_column: str = "words_score"
+        data: pd.DataFrame | gpd.GeoDataFrame,
+        toponym_column: str,
+        word_info_column: str = "words_score",
     ) -> pd.DataFrame | gpd.GeoDataFrame:
         edge_list = []
 
@@ -130,7 +135,9 @@ class Semgraph:
 
         data = clean_from_digits(data, text_column)
 
-        data = clean_from_toponyms(data, text_column, toponym_name_column, toponym_type_column)
+        data = clean_from_toponyms(
+            data, text_column, toponym_name_column, toponym_type_column
+        )
 
         data = clean_from_links(data, text_column)
 
@@ -150,26 +157,44 @@ class Semgraph:
         toponyms_attributes = extracted[1]
         words_attributes = extracted[2]
 
-        preprocessed_df = self.convert_df_to_edge_df(data=df, toponym_column=toponym_column)
+        preprocessed_df = self.convert_df_to_edge_df(
+            data=df, toponym_column=toponym_column
+        )
 
         words_df = get_semantic_closeness(preprocessed_df, "TO", semantic_score_filter)
 
         graph_df = pd.concat([preprocessed_df, words_df], ignore_index=True)
         if directed:
             G = nx.from_pandas_edgelist(
-                graph_df, source="FROM", target="TO", edge_attr=["distance", "type"], create_using=nx.DiGraph()
+                graph_df,
+                source="FROM",
+                target="TO",
+                edge_attr=["distance", "type"],
+                create_using=nx.DiGraph(),
             )
 
         else:
-            G = nx.from_pandas_edgelist(graph_df, source="FROM", target="TO", edge_attr=["distance", "type"])
+            G = nx.from_pandas_edgelist(
+                graph_df, source="FROM", target="TO", edge_attr=["distance", "type"]
+            )
 
         nodes = list(G.nodes())
         attributes = get_tag(nodes, list(set(data[toponym_column])))
 
         nx.set_node_attributes(G, attributes, "tag")
-        G = add_attributes(G=G, new_attributes=toponyms_attributes, attribute_tag="counts", toponym_attributes=True)
+        G = add_attributes(
+            G=G,
+            new_attributes=toponyms_attributes,
+            attribute_tag="counts",
+            toponym_attributes=True,
+        )
 
-        G = add_attributes(G=G, new_attributes=words_attributes, attribute_tag="counts", toponym_attributes=False)
+        G = add_attributes(
+            G=G,
+            new_attributes=words_attributes,
+            attribute_tag="counts",
+            toponym_attributes=False,
+        )
 
         if isinstance(data, gpd.GeoDataFrame):
             G = get_coordinates(
@@ -180,7 +205,12 @@ class Semgraph:
                 geometry_column=geometry_column,
             )
 
-        G = get_text_ids(G=G, filtered_data=df, toponym_column=toponym_column, text_id_column=id_column)
+        G = get_text_ids(
+            G=G,
+            filtered_data=df,
+            toponym_column=toponym_column,
+            text_id_column=id_column,
+        )
 
         return G
 
@@ -253,7 +283,9 @@ class Semgraph:
         if counts_attribute is not None:
             nodes = list(set(G.nodes) & set(new_G.nodes))
             for i in nodes:
-                joined_G.nodes[i]["total_counts"] = G.nodes[i][counts_attribute] + new_G.nodes[i]["counts"]
+                joined_G.nodes[i]["total_counts"] = (
+                    G.nodes[i][counts_attribute] + new_G.nodes[i]["counts"]
+                )
 
         return joined_G
 

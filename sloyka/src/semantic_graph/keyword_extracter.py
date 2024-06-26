@@ -1,15 +1,14 @@
 import time
 
-import pandas as pd
 import geopandas as gpd
+import nltk
+import pandas as pd
+import pymorphy3
+from keybert import KeyBERT
+from nltk.corpus import stopwords
 from tqdm import tqdm
 
-from keybert import KeyBERT
-import nltk
-from nltk.corpus import stopwords
-import pymorphy3
-
-from sloyka.src.utils.constants import STOPWORDS, TAG_ROUTER, SPB_DISTRICTS
+from sloyka.src.utils.constants import STOPWORDS, TAG_ROUTER
 
 nltk.download("stopwords")
 
@@ -19,7 +18,7 @@ RUS_STOPWORDS = stopwords.words("russian") + STOPWORDS
 
 def extract_keywords(
     self,
-    data: pd.DataFrame or gpd.GeoDataFrame,
+    data: pd.DataFrame | gpd.GeoDataFrame,
     text_column: str,
     text_type_column: str,
     toponym_column: str,
@@ -28,7 +27,7 @@ def extract_keywords(
     parents_stack_column: str,
     semantic_key_filter: float = 0.6,
     top_n: int = 1,
-) -> pd.DataFrame or gpd.GeoDataFrame:
+) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     Extract keywords from the given data based on certain criteria.
 
@@ -98,7 +97,9 @@ def extract_keywords(
             texts_to_add = []
 
             for j, text in zip(ids_text_to_extract, texts_to_extract):
-                extraction = model.extract_keywords(text, top_n=top_n, stop_words=RUS_STOPWORDS)
+                extraction = model.extract_keywords(
+                    text, top_n=top_n, stop_words=RUS_STOPWORDS
+                )
                 if extraction:
                     score = extraction[0][1]
                     if score > semantic_key_filter:

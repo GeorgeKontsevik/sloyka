@@ -1,8 +1,8 @@
 import itertools
 
-import networkx as nx
-import geopy
 import geopandas as gpd
+import geopy
+import networkx as nx
 import pandas as pd
 from shapely.geometry import Point
 from tqdm import tqdm
@@ -10,7 +10,10 @@ from tqdm import tqdm
 
 @staticmethod
 def add_attributes(
-    G: nx.classes.graph.Graph, new_attributes: dict, attribute_tag: str, toponym_attributes: bool
+    G: nx.classes.graph.Graph,
+    new_attributes: dict,
+    attribute_tag: str,
+    toponym_attributes: bool,
 ) -> nx.classes.graph.Graph:
     """
     Add attributes to nodes in the graph based on the specified conditions.
@@ -91,21 +94,31 @@ def add_city_graph(
     df = pd.DataFrame(edges, columns=["source", "target", "type"])
 
     if directed:
-        city_graph = nx.from_pandas_edgelist(df, "source", "target", "type", create_using=nx.DiGraph)
+        city_graph = nx.from_pandas_edgelist(
+            df, "source", "target", "type", create_using=nx.DiGraph
+        )
     else:
         city_graph = nx.from_pandas_edgelist(df, "source", "target", "type")
 
     for i in range(len(districts)):
         if "population" in districts.columns:
             city_graph.nodes[districts[name_column].iloc[i]]["tag"] = "DISTRICT"
-            city_graph.nodes[districts[name_column].iloc[i]]["population"] = districts[name_column].iloc[i]
-        city_graph.nodes[districts[name_column].iloc[i]][geometry_column] = str(districts[geometry_column].iloc[i])
+            city_graph.nodes[districts[name_column].iloc[i]]["population"] = districts[
+                name_column
+            ].iloc[i]
+        city_graph.nodes[districts[name_column].iloc[i]][geometry_column] = str(
+            districts[geometry_column].iloc[i]
+        )
 
     for i in range(len(municipals)):
         if "population" in municipals.columns:
             city_graph.nodes[municipals[name_column].iloc[i]]["tag"] = "MUNICIPALITY"
-            city_graph.nodes[municipals[name_column].iloc[i]]["population"] = municipals[name_column].iloc[i]
-        city_graph.nodes[municipals[name_column].iloc[i]][geometry_column] = str(municipals[geometry_column].iloc[i])
+            city_graph.nodes[municipals[name_column].iloc[i]]["population"] = (
+                municipals[name_column].iloc[i]
+            )
+        city_graph.nodes[municipals[name_column].iloc[i]][geometry_column] = str(
+            municipals[geometry_column].iloc[i]
+        )
 
     city_graph.nodes[city]["tag"] = "CITY"
 
@@ -145,7 +158,9 @@ def calculate_node_distances(
             distance_edges.append([i[0], i[1], "удаленность", distance])
             distance_edges.append([i[1], i[0], "удаленность", distance])
 
-    dist_edge_df = pd.DataFrame(distance_edges, columns=["source", "target", "type", "distance"])
+    dist_edge_df = pd.DataFrame(
+        distance_edges, columns=["source", "target", "type", "distance"]
+    )
 
     max_dist = dist_edge_df["distance"].max()
     for i in range(len(dist_edge_df)):
@@ -153,10 +168,16 @@ def calculate_node_distances(
 
     if directed:
         distance_graph = nx.from_pandas_edgelist(
-            dist_edge_df, "source", "target", ["type", "distance"], create_using=nx.DiGraph
+            dist_edge_df,
+            "source",
+            "target",
+            ["type", "distance"],
+            create_using=nx.DiGraph,
         )
     else:
-        distance_graph = nx.from_pandas_edgelist(dist_edge_df, "source", "target", ["type", "distance"])
+        distance_graph = nx.from_pandas_edgelist(
+            dist_edge_df, "source", "target", ["type", "distance"]
+        )
 
     G = nx.compose(G, distance_graph)
 

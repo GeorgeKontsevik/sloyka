@@ -140,3 +140,6 @@ cache/
 .idea/
 .graphml
 .geojson
+
+# vscode
+.history/

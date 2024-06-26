@@ -1,12 +1,13 @@
 import logging
-from typing import Optional, List
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderUnavailable
-
 import warnings
+from typing import List, Optional
+
+from geopy.exc import GeocoderUnavailable
+from geopy.geocoders import Nominatim
 
 warnings.simplefilter("ignore")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 class GeocodingError(Exception):
     """Custom exception for geocoding errors"""
@@ -38,14 +39,22 @@ class Location:
         self.logger.info(f"Geocoding query: {query}")
         for _ in range(Location.max_tries):
             try:
-                geocode = self.geolocator.geocode(query, addressdetails=True, language="ru")
+                geocode = self.geolocator.geocode(
+                    query, addressdetails=True, language="ru"
+                )
                 self.logger.debug(f"Geocode result: {geocode}")
                 return geocode
             except GeocoderUnavailable as e:
-                self.logger.warning(f"Geocoder unavailable, retrying ({_+1}/{Location.max_tries}): {e}")
+                self.logger.warning(
+                    f"Geocoder unavailable, retrying ({_+1}/{Location.max_tries}): {e}"
+                )
                 continue
-        self.logger.error(f"Failed to geocode after {Location.max_tries} tries: {query}")
-        raise GeocodingError(f"Failed to geocode after {Location.max_tries} tries: {query}")
+        self.logger.error(
+            f"Failed to geocode after {Location.max_tries} tries: {query}"
+        )
+        raise GeocodingError(
+            f"Failed to geocode after {Location.max_tries} tries: {query}"
+        )
 
     def query(self, address: str) -> Optional[List[float]]:
         """

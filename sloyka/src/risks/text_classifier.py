@@ -16,19 +16,27 @@ The TextClassifiers class has the following methods:
 @method:run_text_classifier_topics:
  Takes a text as input and returns the predicted themes and probabilities.
 
-@method:run_text_classifier: 
+@method:run_text_classifier:
  Takes a text as input and returns the predicted categories and probabilities.
 """
+
 import pandas as pd
 from transformers import pipeline
-from sloyka.src.utils.exceptions import InvalidInputError, ClassifierInitializationError, ClassificationError
+
+from sloyka.src.utils.exceptions import (
+    ClassificationError,
+    ClassifierInitializationError,
+    InvalidInputError,
+)
 
 
 class TextClassifiers:
     def __init__(self, repository_id, number_of_categories=1, device_type=None):
         self.repository_id = repository_id
         self.number_of_categories = number_of_categories
-        self.device_type = device_type or -1  # -1 will automatically choose the device based on availability
+        self.device_type = (
+            device_type or -1
+        )  # -1 will automatically choose the device based on availability
         self.classifier = None
 
     def initialize_classifier(self):
@@ -41,7 +49,9 @@ class TextClassifiers:
                     device=self.device_type,
                 )
             except Exception as e:
-                raise ClassifierInitializationError(f"Failed to initialize the classifier: {e}")
+                raise ClassifierInitializationError(
+                    f"Failed to initialize the classifier: {e}"
+                )
 
     def classify_text(self, text, is_topic=False):
         if not isinstance(text, str):

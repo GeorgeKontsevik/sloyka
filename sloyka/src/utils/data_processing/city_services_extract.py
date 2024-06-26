@@ -1,9 +1,8 @@
-import pandas as pd
 import numpy as np
-from flair.models import SequenceTagger
 from flair.data import Sentence
+from flair.models import SequenceTagger
 from rapidfuzz import fuzz
-from typing import List
+
 from sloyka.src.utils.constants import CITY_SERVICES_NAMES
 
 tagger = SequenceTagger.load("Glebosol/city_services")
@@ -38,10 +37,14 @@ class City_services:
         return new_list_of_entities
 
     def run(self, df, text_column):
-        df["City_services_extraced"] = df[text_column].apply(lambda text: City_services.extraction_services(text))
+        df["City_services_extraced"] = df[text_column].apply(
+            lambda text: City_services.extraction_services(text)
+        )
         df["City_services_cuted"] = df["City_services_extraced"].apply(
             lambda row: City_services.remove_last_letter(row)
         )
-        df["City_services"] = df["City_services_cuted"].apply(lambda row: City_services.replace_with_most_similar(row))
+        df["City_services"] = df["City_services_cuted"].apply(
+            lambda row: City_services.replace_with_most_similar(row)
+        )
         df.drop("City_services_cuted", axis=1, inplace=True)
         return df

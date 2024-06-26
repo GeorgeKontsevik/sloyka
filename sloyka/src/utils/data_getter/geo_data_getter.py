@@ -1,17 +1,16 @@
-
-
-import osmnx as ox
 import geopandas as gpd
+import networkx as nx
+import osm2geojson
+import osmnx as ox
 import pandas as pd
+import requests
+from tqdm import tqdm
+
 from sloyka.src.utils.constants import (
     GLOBAL_CRS,
     GLOBAL_METRIC_CRS,
 )
-from tqdm import tqdm
-import requests
-import osm2geojson
-import networkx as nx
-from loguru import logger
+
 
 class GeoDataGetter:
     """
@@ -24,6 +23,7 @@ class GeoDataGetter:
     - _get_features_from_place: Retrieves features from a specific place based on category and tag.
     - _handle_error: Handles any errors that occur during the process and prints an error message.
     """
+
     @staticmethod
     def get_osm_data(osm_id: int, tags: dict) -> pd.DataFrame:
         """
@@ -59,9 +59,13 @@ class GeoDataGetter:
             """
 
         try:
-            result = requests.get(overpass_url, params={"data": overpass_query},timeout=30).json()
+            result = requests.get(
+                overpass_url, params={"data": overpass_query}, timeout=30
+            ).json()
             resp = osm2geojson.json2geojson(result)
-            city_bounds = gpd.GeoDataFrame.from_features(resp["features"]).set_crs(GLOBAL_CRS)
+            city_bounds = gpd.GeoDataFrame.from_features(resp["features"]).set_crs(
+                GLOBAL_CRS
+            )
             # Streets.logger.debug(f"City bounds retrieved: {city_bounds}")
             return city_bounds
         except requests.exceptions.RequestException as e:
@@ -73,7 +77,14 @@ class GeoDataGetter:
         osm_id: int,
         tags: dict,
         osm_type="R",
-        selected_columns=["tag", "element_type", "osmid", "name", "geometry", "centroid"],
+        selected_columns=[
+            "tag",
+            "element_type",
+            "osmid",
+            "name",
+            "geometry",
+            "centroid",
+        ],
     ) -> gpd.GeoDataFrame:
         """
         Get features from the given OSM ID using the provided tags and OSM type, and return the results as a GeoDataFrame.
@@ -109,7 +120,9 @@ class GeoDataGetter:
         for category, category_tags in tags.items():
             for tag in tqdm(category_tags, desc=f"Processing category {category}"):
                 try:
-                    gdf = GeoDataGetter._get_features_from_place(place_name, category, tag)
+                    gdf = GeoDataGetter._get_features_from_place(
+                        place_name, category, tag
+                    )
                     gdf_list.append(gdf)
                 except AttributeError:
                     # GeoDataGetter._handle_error(category, tag)
@@ -123,14 +136,16 @@ class GeoDataGetter:
         gdf["tag"] = category
         gdf["centroid"] = gdf["geometry"]
 
-        tmpgdf = ox.projection.project_gdf(gdf, to_crs=GLOBAL_METRIC_CRS, to_latlong=False)
+        tmpgdf = ox.projection.project_gdf(
+            gdf, to_crs=GLOBAL_METRIC_CRS, to_latlong=False
+        )
         tmpgdf["centroid"] = tmpgdf["geometry"].centroid
         tmpgdf = tmpgdf.to_crs(GLOBAL_CRS)
         gdf["centroid"] = tmpgdf["centroid"]
         tmpgdf = None
 
         return gdf
-    
+
     @staticmethod
     def get_drive_graph(city_bounds: gpd.GeoDataFrame) -> nx.MultiDiGraph:
         """
@@ -141,7 +156,9 @@ class GeoDataGetter:
         """
         # Streets.logger.info("Retrieving drive graph")
         try:
-            G_drive = ox.graph_from_polygon(city_bounds.dissolve()["geometry"].squeeze(), network_type="drive")
+            G_drive = ox.graph_from_polygon(
+                city_bounds.dissolve()["geometry"].squeeze(), network_type="drive"
+            )
             # Streets.logger.debug(f"Drive graph retrieved: {G_drive}")
             return G_drive
         except Exception as e:

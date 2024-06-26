@@ -1,16 +1,17 @@
-from loguru import logger
 import sys
 
+from loguru import logger
+
 from .src import (
+    AreaMatcher,
+    City_services,
+    EmotionRecognizer,
     EventDetection,
     Geocoder,
-    TextClassifiers,
     GeoDataGetter,
     Semgraph,
+    TextClassifiers,
     VKParser,
-    City_services,
-    AreaMatcher,
-    EmotionRecognizer,
 )
 
 __all__ = [

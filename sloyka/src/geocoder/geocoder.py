@@ -2,43 +2,32 @@
 TODO: add spellchecker since there might be misspelled words.
 
 This module is aimed to provide necessary tools to find mentioned
-location in the text. 
+location in the text.
 
 @class:Location:
-A class aimed to efficiently geocode addresses using Nominatim. Geocoded addresses are stored in the 'book' dictionary argument. 
+A class aimed to efficiently geocode addresses using Nominatim. Geocoded addresses are stored in the 'book' dictionary argument.
 Thus, if the address repeats, it would be taken from the book.
 
-@class:Streets: 
+@class:Streets:
 A class encapsulating functionality for retrieving street data
 for a specified city from OSM and processing it to extract useful information for geocoding purposes.
 
 @class:Geocoder:
 A class providing functionality for simple geocoding and address extraction.
 """
-import numpy as np
+
+import math
+import os
 import re
 import warnings
-import os
+
 import flair
 import geopandas as gpd
 import pandas as pd
 import pymorphy2
 import torch
-import string
-import math
-from rapidfuzz import fuzz
-from nltk.stem.snowball import SnowballStemmer
-from sloyka.src.utils.data_getter.historical_geo_data_getter import HistGeoDataGetter
-from sloyka.src.utils.constants import (
-    AREA_STOPWORDS,
-    GROUP_STOPWORDS,
-    REGEX_PATTERN,
-    REPLACEMENT_STRING,
-)
-
 from flair.models import SequenceTagger
-from shapely.geometry import Point
-from tqdm import tqdm
+
 # from natasha import (
 #     Segmenter,
 #     MorphVocab,
@@ -48,18 +37,26 @@ from tqdm import tqdm
 #     NewsNERTagger,
 #     Doc,
 # )
-
 from loguru import logger
-
+from nltk.stem.snowball import SnowballStemmer
 from pandarallel import pandarallel
+from rapidfuzz import fuzz
+from shapely.geometry import Point
+from tqdm import tqdm
+
 from sloyka.src.geocoder.city_objects_getter import OtherGeoObjects
-from sloyka.src.utils.data_getter.street_getter import Streets
-from sloyka.src.utils.data_getter.location_getter import Location
-from sloyka.src.utils.data_getter.geo_data_getter import GeoDataGetter
 from sloyka.src.geocoder.street_extractor import StreetExtractor
 from sloyka.src.geocoder.word_form_matcher import WordFormFinder
-
-import warnings
+from sloyka.src.utils.constants import (
+    AREA_STOPWORDS,
+    GROUP_STOPWORDS,
+    REGEX_PATTERN,
+    REPLACEMENT_STRING,
+)
+from sloyka.src.utils.data_getter.geo_data_getter import GeoDataGetter
+from sloyka.src.utils.data_getter.historical_geo_data_getter import HistGeoDataGetter
+from sloyka.src.utils.data_getter.location_getter import Location
+from sloyka.src.utils.data_getter.street_getter import Streets
 
 warnings.simplefilter("ignore")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -76,8 +73,6 @@ morph = pymorphy2.MorphAnalyzer()
 # ner_tagger = NewsNERTagger(emb)
 warnings.simplefilter(action="ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-
 
 
 stemmer = SnowballStemmer("russian")
@@ -99,7 +94,7 @@ class Geocoder:
         model_path: str = "Geor111y/flair-ner-addresses-extractor",
         device: str = "cpu",
         osm_id: int = None,
-        city_tags: dict ={"place": ["state"]}
+        city_tags: dict = {"place": ["state"]},
     ):
         self.device = device
         flair.device = torch.device(device)
@@ -107,11 +102,14 @@ class Geocoder:
         self.osm_id = osm_id
         self.osm_city_name = (
             GeoDataGetter()
-            .get_features_from_id(osm_id=self.osm_id,tags=city_tags, selected_columns=["name", "geometry"])
+            .get_features_from_id(
+                osm_id=self.osm_id,
+                tags=city_tags,
+                selected_columns=["name", "geometry"],
+            )
             .iloc[0]["name"]
         )
         self.street_names = Streets.run(self.osm_id)
-
 
     @staticmethod
     def get_stem(street_names_df: pd.DataFrame) -> pd.DataFrame:
@@ -126,10 +124,11 @@ class Geocoder:
 
         for case in cases:
             street_names_df[case] = street_names_df["street_name"].apply(
-                lambda x: morph.parse(x)[0].inflect({case}).word if morph.parse(x)[0].inflect({case}) else None
+                lambda x: morph.parse(x)[0].inflect({case}).word
+                if morph.parse(x)[0].inflect({case})
+                else None
             )
         return street_names_df
-
 
     @staticmethod
     def get_level(row: pd.Series) -> str:
@@ -148,7 +147,6 @@ class Geocoder:
         else:
             return "global"
 
- 
     def create_gdf(self, df: pd.DataFrame) -> gpd.GeoDataFrame:
         """
         Function simply creates gdf from the recognised geocoded geometries.
@@ -157,8 +155,8 @@ class Geocoder:
 
         df["Location"] = df["addr_to_geocode"].progress_apply(Location().query)
         df = df.dropna(subset=["Location"])
-        df["geometry"] = df['Location'].apply(lambda x: Point(x.longitude, x.latitude))
-        df["Location"] = df['Location'].apply(lambda x: x.address)
+        df["geometry"] = df["Location"].apply(lambda x: Point(x.longitude, x.latitude))
+        df["Location"] = df["Location"].apply(lambda x: x.address)
         df["Numbers"].astype(str)
         gdf = gpd.GeoDataFrame(df, geometry="geometry", crs=Geocoder.global_crs)
 
@@ -180,7 +178,9 @@ class Geocoder:
 
         return gdf
 
-    def merge_to_initial_df(self, gdf: gpd.GeoDataFrame, initial_df: pd.DataFrame) -> gpd.GeoDataFrame:
+    def merge_to_initial_df(
+        self, gdf: gpd.GeoDataFrame, initial_df: pd.DataFrame
+    ) -> gpd.GeoDataFrame:
         """
         This function merges geocoded df to the initial df in order to keep
         all original attributes.
@@ -302,7 +302,10 @@ class Geocoder:
             partial_ratio = fuzz.partial_ratio(group_name, row["area_name_processed"])
             token_sort_ratio = fuzz.token_sort_ratio(group_name_stems, area_stems)
 
-            if partial_ratio > max_partial_ratio and token_sort_ratio > max_token_sort_ratio:
+            if (
+                partial_ratio > max_partial_ratio
+                and token_sort_ratio > max_token_sort_ratio
+            ):
                 max_partial_ratio = partial_ratio
                 max_token_sort_ratio = token_sort_ratio
                 best_match = row["area_name"]
@@ -311,7 +314,12 @@ class Geocoder:
         return best_match, admin_level
 
     def run(
-        self, df: pd.DataFrame, tags:dict|None=None, text_column: str = "text", group_column: str | None = "group_name", search_for_objects=False
+        self,
+        df: pd.DataFrame,
+        tags: dict | None = None,
+        text_column: str = "text",
+        group_column: str | None = "group_name",
+        search_for_objects=False,
     ):
         """
         Runs the data processing pipeline on the input DataFrame.
@@ -340,15 +348,16 @@ class Geocoder:
             if group_column and group_column in df.columns:
                 for i, group_name in enumerate(df[group_column]):
                     processed_group_name = self.preprocess_group_name(group_name)
-                    best_match, admin_level = self.match_group_to_area(processed_group_name, df_areas)
+                    best_match, admin_level = self.match_group_to_area(
+                        processed_group_name, df_areas
+                    )
                     df.at[i, "territory"] = best_match
                     df.at[i, "key"] = admin_level
             del df_areas
         # df = AreaMatcher.run(self, df, osm_id, tags, date)
 
-        df[text_column] = df[text_column].astype(str).str.replace('\n', ' ')
+        df[text_column] = df[text_column].astype(str).str.replace("\n", " ")
         df[text_column] = df[text_column].apply(str)
-        
 
         df = StreetExtractor.process_pipeline(df, text_column, self.classifier)
         street_names = self.get_stem(self.street_names)
@@ -359,6 +368,7 @@ class Geocoder:
         gdf = self.create_gdf(df)
         del df
 
+        # FIXME: Undefined name `df`
         if search_for_objects:
             df_obj = OtherGeoObjects.run(self.osm_id, df, text_column)
             gdf = pd.concat([gdf, df_obj], ignore_index=True)
@@ -378,7 +388,6 @@ class Geocoder:
         # gdf2 = self.set_global_repr_point(gdf2)
         gdf.set_crs(4326, inplace=True)
         return gdf
-    
 
     # def extract_ner_street(self, text: str) -> pd.Series:
     #     """
@@ -475,7 +484,7 @@ class Geocoder:
     #     else:
     #         return None
 
-       # def get_street(self, df: pd.DataFrame, text_column: str) -> gpd.GeoDataFrame:
+    # def get_street(self, df: pd.DataFrame, text_column: str) -> gpd.GeoDataFrame:
     #     """
     #     Function calls NER model and post-process result in order to extract
     #     the address mentioned in the text.
@@ -531,7 +540,6 @@ class Geocoder:
 
     # df = pd.DataFrame(data={'text': 'На биржевой 14 что-то произошло'}, index=[0])
     # print(Geocoder().run(df=df, text_column='text'))
-
 
     # def find_word_form(self, df: pd.DataFrame, strts_df: pd.DataFrame) -> pd.DataFrame:
     #     """
