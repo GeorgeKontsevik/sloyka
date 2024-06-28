@@ -56,6 +56,7 @@ from sloyka.src.geocoder.city_objects_extractor import OtherGeoObjects
 from sloyka.src.utils.data_getter.street_getter import Streets
 from sloyka.src.utils.data_getter.location_getter import Location
 from sloyka.src.utils.data_getter.geo_data_getter import GeoDataGetter
+from sloyka.src.utils.data_preprocessing.preprocessor import PreprocessorInput
 from sloyka.src.geocoder.street_extractor import StreetExtractor
 from sloyka.src.geocoder.word_form_matcher import WordFormFinder
 
@@ -86,11 +87,13 @@ class Geocoder:
 
     def __init__(
         self,
+        df,
         model_path: str = "Geor111y/flair-ner-addresses-extractor",
         device: str = "cpu",
         osm_id: int = None,
         city_tags: dict ={"place": ["state"]}
     ):
+        self.df = PreprocessorInput().run(df)
         self.device = device
         flair.device = torch.device(device)
         self.classifier = SequenceTagger.load(model_path)
@@ -301,7 +304,7 @@ class Geocoder:
         return best_match, admin_level
 
     def run(
-        self, df: pd.DataFrame, tags:dict|None=None, text_column: str = "text", group_column: str | None = "group_name", search_for_objects=False
+        self, df: pd.DataFrame = None, tags:dict|None=None, text_column: str = "text", group_column: str | None = "group_name", search_for_objects=False
     ):
         """
         Runs the data processing pipeline on the input DataFrame.
@@ -321,7 +324,7 @@ class Geocoder:
         objects and street names, preprocesses the street names, finds the word form, creates a GeoDataFrame,
         merges it with the other geographic objects, assigns the street tag, and returns the final GeoDataFrame.
         """
-
+        df = self.df
         initial_df = df.copy()
 
         if search_for_objects:

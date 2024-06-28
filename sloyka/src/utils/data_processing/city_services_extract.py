@@ -5,6 +5,7 @@ from flair.data import Sentence
 from rapidfuzz import fuzz
 from typing import List
 from sloyka.src.utils.constants import CITY_SERVICES_NAMES
+from sloyka.src.utils.data_preprocessing.preprocessor import PreprocessorInput
 
 tagger = SequenceTagger.load("Glebosol/city_services")
 
@@ -38,6 +39,8 @@ class City_services:
         return new_list_of_entities
 
     def run(self, df, text_column):
+        column_name = text_column
+        df = PreprocessorInput.run(df, column_name)
         df["City_services_extraced"] = df[text_column].apply(lambda text: City_services.extraction_services(text))
         df["City_services_cuted"] = df["City_services_extraced"].apply(
             lambda row: City_services.remove_last_letter(row)

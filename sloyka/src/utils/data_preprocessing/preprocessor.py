@@ -4,6 +4,8 @@ import pandas as pd
 import geopandas as gpd
 import osmnx as ox
 import networkx as nx
+import numpy as np
+from loguru import logger
 
 
 @staticmethod
@@ -134,3 +136,46 @@ def graph_to_gdf(G_drive: nx.MultiDiGraph) -> gpd.GeoDataFrame:
     except Exception as e:
         # Streets.logger.error(f"Error converting graph to GeoDataFrame: {e}")
         raise e
+
+class PreprocessorInput:
+    
+    @staticmethod
+    def preprocess_dataframe(df, column_name) -> pd.DataFrame:
+        """
+        A function for preprocessing a dataframe.
+        """
+        df[column_name] = df[column_name].astype(str)
+        df[column_name] = df[column_name].str.replace('\n', ' ').str.replace('\r', ' ')
+        
+        initial_row_count = len(df)
+        
+        df = df[df[column_name].apply(PreprocessorInput.validation_row)]
+        
+        processed_row_count = len(df)
+        
+        logger.info(f"Preprocessing is complete")
+        logger.info(f"Initial df row count: {initial_row_count}")
+        logger.info(f"Processed df row count: {processed_row_count}")
+        # print(f"Initial df row count: {initial_row_count}")
+        # print(f"Processed df row count: {processed_row_count}")
+        return df
+    
+    @staticmethod
+    def validation_row(row):
+        """
+        Checks whether the row matches the specified conditions.
+        """
+        if pd.isna(row) or row == "" or row.isspace():
+            return False
+        if len(row.split()) <= 1 or len(row) <= 5:
+            return False
+        if not re.search('[а-яА-Я]', row):
+            return False
+        if row.isdigit():
+            return False
+        return True
+
+    @staticmethod
+    def run(df, column_name='text'):
+        preprocessed_df = PreprocessorInput.preprocess_dataframe(df, column_name)
+        return preprocessed_df
