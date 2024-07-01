@@ -8,6 +8,7 @@ from .semantic_graph.semantic_graph_builder import Semgraph
 from .utils.data_processing.city_services_extract import City_services
 from .utils.data_processing.area_matcher import AreaMatcher
 from .risks.emotion_classifier import EmotionRecognizer
+from .regional_activity import RegionalActivity
 
 __all__ = [
     "EventDetection",
@@ -20,4 +21,5 @@ __all__ = [
     "City_services",
     "AreaMatcher",
     "EmotionRecognizer",
+    "RegionalActivity"
 ]

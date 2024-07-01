@@ -11,6 +11,7 @@ from .src import (
     City_services,
     AreaMatcher,
     EmotionRecognizer,
+    RegionalActivity
 )
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "City_services",
     "AreaMatcher",
     "EmotionRecognizer",
+    "RegionalActivity"
 ]
 
 # logger.remove()
