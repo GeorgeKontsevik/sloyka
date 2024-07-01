@@ -1,0 +1,927 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+        <title>sloyka.src.geocoder.geocoder - sloyka 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/_static/custom.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">sloyka 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../../../_static/logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">sloyka 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">About:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Receiving:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/data_getter.html">Data getter</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../modules/geocoder.html">Geo-objects finder</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Geo-objects finder</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/Geocoder_special.html">Geocoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/OtherGeoObjects.html">OtherGeoObjects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/StreetExtractor.html">StreetExtractor</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tagging:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/city_services_extract.html">Services extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/emotion_classifier.html">Emotion classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/text_classifier.html">Text Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/topic_modeler.html">Topic Modelling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modelling:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/semantic_graph.html">Semantic graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/regional_activity.html">Regional activity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/event_dynamic_prediction.html">Event detector</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/visualize_graph.html">Graph visualization</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for sloyka.src.geocoder.geocoder</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">TODO: add spellchecker since there might be misspelled words.</span>
+
+<span class="sd">This module is aimed to provide necessary tools to find mentioned</span>
+<span class="sd">location in the text. </span>
+
+<span class="sd">@class:Location:</span>
+<span class="sd">A class aimed to efficiently geocode addresses using Nominatim. Geocoded addresses are stored in the &#39;book&#39; dictionary argument. </span>
+<span class="sd">Thus, if the address repeats, it would be taken from the book.</span>
+
+<span class="sd">@class:Streets: </span>
+<span class="sd">A class encapsulating functionality for retrieving street data</span>
+<span class="sd">for a specified city from OSM and processing it to extract useful information for geocoding purposes.</span>
+
+<span class="sd">@class:Geocoder:</span>
+<span class="sd">A class providing functionality for simple geocoding and address extraction.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">flair</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pymorphy2</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">rapidfuzz</span> <span class="kn">import</span> <span class="n">fuzz</span>
+<span class="kn">from</span> <span class="nn">nltk.stem.snowball</span> <span class="kn">import</span> <span class="n">SnowballStemmer</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.utils.data_getter.historical_geo_data_getter</span> <span class="kn">import</span> <span class="n">HistGeoDataGetter</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.utils.constants</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AREA_STOPWORDS</span><span class="p">,</span>
+    <span class="n">GROUP_STOPWORDS</span><span class="p">,</span>
+    <span class="n">REGEX_PATTERN</span><span class="p">,</span>
+    <span class="n">REPLACEMENT_STRING</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">flair.models</span> <span class="kn">import</span> <span class="n">SequenceTagger</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="c1"># from natasha import (</span>
+<span class="c1">#     Segmenter,</span>
+<span class="c1">#     MorphVocab,</span>
+<span class="c1">#     NewsEmbedding,</span>
+<span class="c1">#     NewsMorphTagger,</span>
+<span class="c1">#     NewsSyntaxParser,</span>
+<span class="c1">#     NewsNERTagger,</span>
+<span class="c1">#     Doc,</span>
+<span class="c1"># )</span>
+
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">pandarallel</span> <span class="kn">import</span> <span class="n">pandarallel</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.geocoder.city_objects_getter</span> <span class="kn">import</span> <span class="n">OtherGeoObjects</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.utils.data_getter.street_getter</span> <span class="kn">import</span> <span class="n">Streets</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.utils.data_getter.location_getter</span> <span class="kn">import</span> <span class="n">Location</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.utils.data_getter.geo_data_getter</span> <span class="kn">import</span> <span class="n">GeoDataGetter</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.geocoder.street_extractor</span> <span class="kn">import</span> <span class="n">StreetExtractor</span>
+<span class="kn">from</span> <span class="nn">sloyka.src.geocoder.word_form_matcher</span> <span class="kn">import</span> <span class="n">WordFormFinder</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+
+<span class="n">pandarallel</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nb_workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># segmenter = Segmenter()</span>
+<span class="c1"># morph_vocab = MorphVocab()</span>
+<span class="n">morph</span> <span class="o">=</span> <span class="n">pymorphy2</span><span class="o">.</span><span class="n">MorphAnalyzer</span><span class="p">()</span>
+
+<span class="c1"># emb = NewsEmbedding()</span>
+<span class="c1"># morph_tagger = NewsMorphTagger(emb)</span>
+<span class="c1"># syntax_parser = NewsSyntaxParser(emb)</span>
+<span class="c1"># ner_tagger = NewsNERTagger(emb)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+
+
+
+
+<span class="n">stemmer</span> <span class="o">=</span> <span class="n">SnowballStemmer</span><span class="p">(</span><span class="s2">&quot;russian&quot;</span><span class="p">)</span>
+
+<span class="n">tqdm</span><span class="o">.</span><span class="n">pandas</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Geocoder">
+<a class="viewcode-back" href="../../../../modules/geocoder.html#sloyka.src.geocoder.geocoder.Geocoder">[docs]</a>
+<span class="k">class</span> <span class="nc">Geocoder</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides a functionality of simple geocoder</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+    <span class="n">global_crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4326</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Geor111y/flair-ner-addresses-extractor&quot;</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="n">osm_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">city_tags</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span><span class="p">{</span><span class="s2">&quot;place&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]}</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="n">flair</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span> <span class="o">=</span> <span class="n">SequenceTagger</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">osm_id</span> <span class="o">=</span> <span class="n">osm_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">osm_city_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">GeoDataGetter</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">get_features_from_id</span><span class="p">(</span><span class="n">osm_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">osm_id</span><span class="p">,</span><span class="n">tags</span><span class="o">=</span><span class="n">city_tags</span><span class="p">,</span> <span class="n">selected_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">street_names</span> <span class="o">=</span> <span class="n">Streets</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">osm_id</span><span class="p">)</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_stem</span><span class="p">(</span><span class="n">street_names_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function finds the stem of the word to find this stem in the street</span>
+<span class="sd">        names dictionary (df).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;get_stem started&quot;</span><span class="p">)</span>
+
+        <span class="n">morph</span> <span class="o">=</span> <span class="n">pymorphy2</span><span class="o">.</span><span class="n">MorphAnalyzer</span><span class="p">()</span>
+        <span class="n">cases</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;nomn&quot;</span><span class="p">,</span> <span class="s2">&quot;gent&quot;</span><span class="p">,</span> <span class="s2">&quot;datv&quot;</span><span class="p">,</span> <span class="s2">&quot;accs&quot;</span><span class="p">,</span> <span class="s2">&quot;ablt&quot;</span><span class="p">,</span> <span class="s2">&quot;loct&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">cases</span><span class="p">:</span>
+            <span class="n">street_names_df</span><span class="p">[</span><span class="n">case</span><span class="p">]</span> <span class="o">=</span> <span class="n">street_names_df</span><span class="p">[</span><span class="s2">&quot;street_name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">morph</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inflect</span><span class="p">({</span><span class="n">case</span><span class="p">})</span><span class="o">.</span><span class="n">word</span> <span class="k">if</span> <span class="n">morph</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inflect</span><span class="p">({</span><span class="n">case</span><span class="p">})</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">street_names_df</span>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_level</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Addresses in the messages are recognized on different scales:</span>
+<span class="sd">        1. Where we know the street name and house number -- house level;</span>
+<span class="sd">        2. Where we know only street name -- street level (with the centroid</span>
+<span class="sd">        geometry of the street);</span>
+<span class="sd">        3. Where we don&#39;t know any info but the city -- global level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Street&quot;</span><span class="p">]))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Numbers&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;street&quot;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Street&quot;</span><span class="p">]))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Numbers&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;house&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;global&quot;</span>
+
+ 
+    <span class="k">def</span> <span class="nf">create_gdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function simply creates gdf from the recognised geocoded geometries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;create_gdf started&quot;</span><span class="p">)</span>
+
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;addr_to_geocode&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="n">Location</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Location&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Location&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">latitude</span><span class="p">))</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Location&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Numbers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">Geocoder</span><span class="o">.</span><span class="n">global_crs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gdf</span>
+
+    <span class="k">def</span> <span class="nf">set_global_repr_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function set the centroid (actually, representative point) of the</span>
+<span class="sd">        geocoded addresses to those texts that weren&#39;t geocoded (or didn&#39;t</span>
+<span class="sd">        contain any addresses according to the trained NER model).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">unary_union</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">gdf</span>
+
+    <span class="k">def</span> <span class="nf">merge_to_initial_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">initial_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function merges geocoded df to the initial df in order to keep</span>
+<span class="sd">        all original attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initial_df.drop(columns=[&#39;key_0&#39;], inplace=True)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">initial_df</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">gdf</span><span class="p">[</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;Street&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;initial_street&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;only_full_street_name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Numbers&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Score&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;location_options&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Location&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;geometry&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">],</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">Geocoder</span><span class="o">.</span><span class="n">global_crs</span><span class="p">)</span>
+
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">assign_street</span><span class="p">(</span><span class="n">variable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">variable</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;street&quot;</span>
+        <span class="k">return</span> <span class="n">variable</span>
+
+    <span class="k">def</span> <span class="nf">get_df_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">osm_id</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the GeoDataFrame of areas corresponding to the given OSM ID and tags.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            osm_id (int): The OpenStreetMap ID.</span>
+<span class="sd">            tags (dict): The tags to filter by.</span>
+<span class="sd">            date (str): The date of the data to retrieve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            gpd.GeoDataFrame: The GeoDataFrame containing the areas.</span>
+
+<span class="sd">        This function first checks if the GeoDataFrame corresponding to the given OSM ID is already in the cache.</span>
+<span class="sd">        If it is, it returns the cached GeoDataFrame. Otherwise, it retrieves the GeoDataFrame from the HistGeoDataGetter,</span>
+<span class="sd">        filters out the &#39;way&#39; elements, and adds it to the cache. Finally, it returns the GeoDataFrame from the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">area_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">osm_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">area_cache</span><span class="p">:</span>
+            <span class="n">geo_data_getter</span> <span class="o">=</span> <span class="n">HistGeoDataGetter</span><span class="p">()</span>
+            <span class="n">df_areas</span> <span class="o">=</span> <span class="n">geo_data_getter</span><span class="o">.</span><span class="n">get_features_from_id</span><span class="p">(</span><span class="n">osm_id</span><span class="o">=</span><span class="n">osm_id</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">)</span>
+            <span class="n">df_areas</span> <span class="o">=</span> <span class="n">df_areas</span><span class="p">[</span><span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;element_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;way&quot;</span><span class="p">]</span>
+            <span class="n">area_cache</span><span class="p">[</span><span class="n">osm_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_areas</span>
+        <span class="k">return</span> <span class="n">area_cache</span><span class="p">[</span><span class="n">osm_id</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">preprocess_group_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocesses a group name by converting it to lowercase, removing special characters, and removing specified stopwords.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            group_name (str): The group name to preprocess.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The preprocessed group name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group_name</span> <span class="o">=</span> <span class="n">group_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">group_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">REGEX_PATTERN</span><span class="p">,</span> <span class="n">REPLACEMENT_STRING</span><span class="p">,</span> <span class="n">group_name</span><span class="p">)</span>
+        <span class="n">words_to_remove</span> <span class="o">=</span> <span class="n">GROUP_STOPWORDS</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_to_remove</span><span class="p">:</span>
+            <span class="n">group_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">group_name</span>
+
+    <span class="k">def</span> <span class="nf">preprocess_area_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_areas</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocesses the area names in the given DataFrame by removing specified stopwords, converting the names to lowercase,</span>
+<span class="sd">        and stemming them.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            df_areas (DataFrame): The DataFrame containing the area names.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataFrame: The DataFrame with preprocessed area names, where the &#39;area_name&#39; column contains the original names</span>
+<span class="sd">                      with stopwords removed, the &#39;area_name_processed&#39; column contains the lowercase names with special characters</span>
+<span class="sd">                      removed, and the &#39;area_stems&#39; column contains the stemmed names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">words_to_remove</span> <span class="o">=</span> <span class="n">AREA_STOPWORDS</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_to_remove</span><span class="p">:</span>
+            <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_name_processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_name_processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_name_processed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">REGEX_PATTERN</span><span class="p">,</span> <span class="n">REPLACEMENT_STRING</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_stems&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_areas</span><span class="p">[</span><span class="s2">&quot;area_name_processed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df_areas</span>
+
+    <span class="k">def</span> <span class="nf">match_group_to_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">df_areas</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Matches a given group name to an area in a DataFrame of areas.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            group_name (str): The name of the group to match.</span>
+<span class="sd">            df_areas (DataFrame): The DataFrame containing the areas to match against.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A tuple containing the best match for the group name and the admin level of the match.</span>
+<span class="sd">                   If no match is found, returns (None, None).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group_name_stems</span> <span class="o">=</span> <span class="p">[</span><span class="n">stemmer</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">group_name</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+        <span class="n">max_partial_ratio</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">max_token_sort_ratio</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">best_match</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">admin_level</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df_areas</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">area_stems</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;area_stems&quot;</span><span class="p">]</span>
+
+            <span class="n">partial_ratio</span> <span class="o">=</span> <span class="n">fuzz</span><span class="o">.</span><span class="n">partial_ratio</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;area_name_processed&quot;</span><span class="p">])</span>
+            <span class="n">token_sort_ratio</span> <span class="o">=</span> <span class="n">fuzz</span><span class="o">.</span><span class="n">token_sort_ratio</span><span class="p">(</span><span class="n">group_name_stems</span><span class="p">,</span> <span class="n">area_stems</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">partial_ratio</span> <span class="o">&gt;</span> <span class="n">max_partial_ratio</span> <span class="ow">and</span> <span class="n">token_sort_ratio</span> <span class="o">&gt;</span> <span class="n">max_token_sort_ratio</span><span class="p">:</span>
+                <span class="n">max_partial_ratio</span> <span class="o">=</span> <span class="n">partial_ratio</span>
+                <span class="n">max_token_sort_ratio</span> <span class="o">=</span> <span class="n">token_sort_ratio</span>
+                <span class="n">best_match</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;area_name&quot;</span><span class="p">]</span>
+                <span class="n">admin_level</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">best_match</span><span class="p">,</span> <span class="n">admin_level</span>
+
+<div class="viewcode-block" id="Geocoder.run">
+<a class="viewcode-back" href="../../../../modules/geocoder.html#sloyka.src.geocoder.geocoder.Geocoder.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span><span class="nb">dict</span><span class="o">|</span><span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">group_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;group_name&quot;</span><span class="p">,</span> <span class="n">search_for_objects</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs the data processing pipeline on the input DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tags (dict): The tags to filter by.</span>
+<span class="sd">            date (str): The date of the data to retrieve.</span>
+<span class="sd">            df (pd.DataFrame): The input DataFrame.</span>
+<span class="sd">            text_column (str, optional): The name of the text column in the DataFrame. Defaults to &quot;text&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            gpd.GeoDataFrame: The processed DataFrame after running the data processing pipeline.</span>
+
+<span class="sd">        This function retrieves the GeoDataFrame of areas corresponding to the given OSM ID and tags.</span>
+<span class="sd">        It then preprocesses the area names and matches each group name to an area. The best match</span>
+<span class="sd">        and admin level are assigned to the DataFrame. The function also retrieves other geographic</span>
+<span class="sd">        objects and street names, preprocesses the street names, finds the word form, creates a GeoDataFrame,</span>
+<span class="sd">        merges it with the other geographic objects, assigns the street tag, and returns the final GeoDataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initial_df = df.copy()</span>
+        <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="n">df_areas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df_areas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">osm_id</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+            <span class="n">df_areas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_area_names</span><span class="p">(</span><span class="n">df_areas</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">group_column</span> <span class="ow">and</span> <span class="n">group_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">group_column</span><span class="p">]):</span>
+                    <span class="n">processed_group_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_group_name</span><span class="p">(</span><span class="n">group_name</span><span class="p">)</span>
+                    <span class="n">best_match</span><span class="p">,</span> <span class="n">admin_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_group_to_area</span><span class="p">(</span><span class="n">processed_group_name</span><span class="p">,</span> <span class="n">df_areas</span><span class="p">)</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;territory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_match</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">admin_level</span>
+            <span class="k">del</span> <span class="n">df_areas</span>
+        <span class="c1"># df = AreaMatcher.run(self, df, osm_id, tags, date)</span>
+
+        <span class="n">df</span><span class="p">[</span><span class="n">text_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">text_column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">df_reconstruction</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">text_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">text_column</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">StreetExtractor</span><span class="o">.</span><span class="n">process_pipeline</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">text_column</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">)</span>
+        <span class="n">street_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">street_names</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">WordFormFinder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">osm_city_name</span><span class="p">)</span><span class="o">.</span><span class="n">find_word_form</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">street_names</span><span class="p">)</span>
+
+        <span class="k">del</span> <span class="n">street_names</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_gdf</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">df</span>
+
+        <span class="k">if</span> <span class="n">search_for_objects</span><span class="p">:</span>
+            <span class="n">df_obj</span> <span class="o">=</span> <span class="n">OtherGeoObjects</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">osm_id</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">text_column</span><span class="p">)</span>
+            <span class="n">gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">gdf</span><span class="p">,</span> <span class="n">df_obj</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">df_obj</span>
+            <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;geo_obj_tag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;geo_obj_tag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">Geocoder</span><span class="o">.</span><span class="n">assign_street</span><span class="p">)</span>
+
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">gdf</span><span class="p">,</span> <span class="n">df_reconstruction</span><span class="p">[</span><span class="o">~</span><span class="n">df_reconstruction</span><span class="p">[</span><span class="n">text_column</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">gdf</span><span class="p">[</span><span class="n">text_column</span><span class="p">])]],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="c1"># gdf2 = self.merge_to_initial_df(gdf, initial_df)</span>
+
+        <span class="c1"># # Add a new &#39;level&#39; column using the get_level function</span>
+        <span class="c1"># gdf2[&quot;level&quot;] = gdf2.progress_apply(self.get_level, axis=1)</span>
+        <span class="c1"># gdf2 = self.set_global_repr_point(gdf2)</span>
+        <span class="n">gdf</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gdf</span></div>
+</div>
+
+    
+
+    <span class="c1"># def extract_ner_street(self, text: str) -&gt; pd.Series:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Function calls the pre-trained custom NER model to extract mentioned</span>
+    <span class="c1">#     addresses from the texts (usually comment) in social networks in</span>
+    <span class="c1">#     russian language.</span>
+    <span class="c1">#     The model scores 0.8 in F1 and other metrics.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     try:</span>
+    <span class="c1">#         text = re.sub(r&quot;\[.*?\]&quot;, &quot;&quot;, text)</span>
+    <span class="c1">#     except Exception:</span>
+    <span class="c1">#         return pd.Series([None, None])</span>
+
+    <span class="c1">#     sentence = Sentence(text)</span>
+    <span class="c1">#     self.classifier.predict(sentence)</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         res = sentence.get_labels(&quot;ner&quot;)[0].labeled_identifier.split(&quot;]: &quot;)[1].split(&quot;/&quot;)[0].replace(&#39;&quot;&#39;, &quot;&quot;)</span>
+    <span class="c1">#         score = round(sentence.get_labels(&quot;ner&quot;)[0].score, 3)</span>
+    <span class="c1">#         if score &gt; 0.7:</span>
+    <span class="c1">#             return pd.Series([res, score])</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             return pd.Series([None, None])</span>
+
+    <span class="c1">#     except IndexError:</span>
+    <span class="c1">#         return pd.Series([None, None])</span>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def extract_building_num(text, street_name, number) -&gt; string:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     The function finds the already extracted street name in the text</span>
+    <span class="c1">#     and searches for numbers related to building numbers in a certain range of indexes</span>
+    <span class="c1">#     around the street name.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if pd.notna(number) and number != &quot;&quot;:</span>
+    <span class="c1">#         return number</span>
+    <span class="c1">#     if isinstance(text, float) and math.isnan(text):</span>
+    <span class="c1">#         return &quot;&quot;</span>
+
+    <span class="c1">#     clear_text = str(text).translate(str.maketrans(&quot;&quot;, &quot;&quot;, string.punctuation))</span>
+    <span class="c1">#     clear_text = clear_text.lower().split(&quot; &quot;)</span>
+    <span class="c1">#     positions = [index for index, item in enumerate(clear_text) if item == street_name]</span>
+
+    <span class="c1">#     if not positions:</span>
+    <span class="c1">#         return &quot;&quot;</span>
+
+    <span class="c1">#     position = positions[0]</span>
+    <span class="c1">#     search_start = max(0, position)</span>
+    <span class="c1">#     search_end = min(len(clear_text), position + END_INDEX_POSITION)</span>
+
+    <span class="c1">#     num_result = []</span>
+
+    <span class="c1">#     for f_index in range(max(0, search_start), min(len(clear_text), search_end)):</span>
+    <span class="c1">#         element = clear_text[f_index]</span>
+    <span class="c1">#         if any(character.isdigit() for character in str(element)) and len(str(element)) &lt;= 3:</span>
+    <span class="c1">#             num_result.append(element)</span>
+    <span class="c1">#             break</span>
+
+    <span class="c1">#     if num_result:</span>
+    <span class="c1">#         return num_result[0]</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return &quot;&quot;</span>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def extract_toponym(text, street_name) -&gt; string:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     The function finds the already extracted street name in the text</span>
+    <span class="c1">#     and searches for words related to toponyms in a certain range of indexes</span>
+    <span class="c1">#     around the street name.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if isinstance(text, float) and math.isnan(text):</span>
+    <span class="c1">#         return None</span>
+
+    <span class="c1">#     clear_text = str(text).translate(str.maketrans(&quot;&quot;, &quot;&quot;, string.punctuation))</span>
+    <span class="c1">#     clear_text = clear_text.lower().split(&quot; &quot;)</span>
+    <span class="c1">#     positions = [index for index, item in enumerate(clear_text) if item == street_name]</span>
+
+    <span class="c1">#     if not positions:</span>
+    <span class="c1">#         return None</span>
+
+    <span class="c1">#     position = positions[0]</span>
+    <span class="c1">#     search_start = max(0, position - int(START_INDEX_POSITION))</span>
+    <span class="c1">#     search_end = min(len(clear_text), position + int(END_INDEX_POSITION))</span>
+
+    <span class="c1">#     ad_result = []</span>
+    <span class="c1">#     for i in range(search_start, min(search_end + 1, len(clear_text))):</span>
+    <span class="c1">#         word = clear_text[i]</span>
+    <span class="c1">#         normal_form = morph.parse(word)[0].normal_form</span>
+    <span class="c1">#         if normal_form in TARGET_TOPONYMS:</span>
+    <span class="c1">#             ad_result.append(REPLACEMENT_DICT.get(normal_form, normal_form))</span>
+
+    <span class="c1">#     if ad_result:</span>
+    <span class="c1">#         return ad_result[0]</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return None</span>
+
+       <span class="c1"># def get_street(self, df: pd.DataFrame, text_column: str) -&gt; gpd.GeoDataFrame:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Function calls NER model and post-process result in order to extract</span>
+    <span class="c1">#     the address mentioned in the text.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     logger.info(&quot;get_street started&quot;)</span>
+
+    <span class="c1">#     df[text_column].dropna(inplace=True)</span>
+    <span class="c1">#     df[text_column] = df[text_column].astype(str)</span>
+
+    <span class="c1">#     logger.info(&quot;extract_ner_street started&quot;)</span>
+
+    <span class="c1">#     df[[&quot;Street&quot;, &quot;Score&quot;]] = df[text_column].progress_apply(lambda t: self.extract_ner_street(t))</span>
+    <span class="c1">#     df[&quot;Street&quot;] = df[[text_column, &quot;Street&quot;]].progress_apply(</span>
+    <span class="c1">#         lambda row: Geocoder.get_ner_address_natasha(row, text_column),</span>
+    <span class="c1">#         axis=1,</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1">#     df = df[df.Street.notna()]</span>
+    <span class="c1">#     df = df[df[&quot;Street&quot;].str.contains(&quot;[а-яА-Я]&quot;)]</span>
+
+    <span class="c1">#     logger.info(&quot;pattern1.sub started&quot;)</span>
+
+    <span class="c1">#     pattern1 = re.compile(r&quot;(\D)(\d)(\D)&quot;)</span>
+    <span class="c1">#     df[&quot;Street&quot;] = df[&quot;Street&quot;].progress_apply(lambda x: pattern1.sub(r&quot;\1 \2\3&quot;, x))</span>
+
+    <span class="c1">#     logger.info(&quot;pattern2.findall started&quot;)</span>
+
+    <span class="c1">#     pattern2 = re.compile(r&quot;\d+&quot;)</span>
+    <span class="c1">#     df[&quot;Numbers&quot;] = df[&quot;Street&quot;].progress_apply(lambda x: &quot; &quot;.join(pattern2.findall(x)))</span>
+
+    <span class="c1">#     logger.info(&quot;pattern2.sub started&quot;)</span>
+
+    <span class="c1">#     df[&quot;Street&quot;] = df[&quot;Street&quot;].progress_apply(lambda x: pattern2.sub(&quot;&quot;, x).strip())</span>
+
+    <span class="c1">#     df[&quot;initial_street&quot;] = df[&quot;Street&quot;].copy()</span>
+
+    <span class="c1">#     df[&quot;Street&quot;] = df[&quot;Street&quot;].str.lower()</span>
+
+    <span class="c1">#     logger.info(&quot;extract_building_num started&quot;)</span>
+
+    <span class="c1">#     df[&quot;Numbers&quot;] = df.progress_apply(</span>
+    <span class="c1">#         lambda row: Geocoder.extract_building_num(row[text_column], row[&quot;Street&quot;], row[&quot;Numbers&quot;]),</span>
+    <span class="c1">#         axis=1,</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1">#     logger.info(&quot;extract_toponym started&quot;)</span>
+
+    <span class="c1">#     df[&quot;Toponims&quot;] = df.progress_apply(</span>
+    <span class="c1">#         lambda row: Geocoder.extract_toponym(row[text_column], row[&quot;Street&quot;]),</span>
+    <span class="c1">#         axis=1,</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     return df</span>
+
+    <span class="c1"># df = pd.DataFrame(data={&#39;text&#39;: &#39;На биржевой 14 что-то произошло&#39;}, index=[0])</span>
+    <span class="c1"># print(Geocoder().run(df=df, text_column=&#39;text&#39;))</span>
+
+
+    <span class="c1"># def find_word_form(self, df: pd.DataFrame, strts_df: pd.DataFrame) -&gt; pd.DataFrame:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     In Russian language any word has different forms.</span>
+    <span class="c1">#     Since addresses are extracted from the texts in social networks,</span>
+    <span class="c1">#     they might be in any possible form. This function is aimed to match that</span>
+    <span class="c1">#     free form to the one that is used in the OSM database.</span>
+
+    <span class="c1">#     Since the stem is found there would be several streets with that stem</span>
+    <span class="c1">#     in their name.</span>
+    <span class="c1">#     However, the searching street name has its specific ending (form) and</span>
+    <span class="c1">#     not each matched street name could have it.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     df[&quot;full_street_name&quot;] = None</span>
+
+    <span class="c1">#     for idx, row in df.iterrows():</span>
+    <span class="c1">#         search_val = row[&quot;Street&quot;]</span>
+    <span class="c1">#         search_top = row[&quot;Toponims&quot;]</span>
+    <span class="c1">#         val_num = row[&quot;Numbers&quot;]</span>
+
+    <span class="c1">#         for col in strts_df.columns[2:]:</span>
+    <span class="c1">#             search_rows = strts_df.loc[strts_df[col] == search_val]</span>
+    <span class="c1">#             matching_rows = search_rows[search_rows[&quot;toponim_name&quot;] == search_top]</span>
+
+    <span class="c1">#             if not matching_rows.empty:</span>
+    <span class="c1">#                 only_streets_full = matching_rows[&quot;street&quot;].values</span>
+    <span class="c1">#                 streets_full = [</span>
+    <span class="c1">#                     street + f&quot; {val_num}&quot; + f&quot; {self.osm_city_name}&quot; + &quot; Россия&quot; for street in only_streets_full</span>
+    <span class="c1">#                 ]</span>
+
+    <span class="c1">#                 df.loc[idx, &quot;full_street_name&quot;] = &quot;,&quot;.join(streets_full)</span>
+    <span class="c1">#                 df.loc[idx, &quot;only_full_street_name&quot;] = &quot;,&quot;.join(only_streets_full)</span>
+
+    <span class="c1">#             else:</span>
+    <span class="c1">#                 if search_val in strts_df[col].values:</span>
+    <span class="c1">#                     only_streets_full = strts_df.loc[strts_df[col] == search_val, &quot;street&quot;].values</span>
+    <span class="c1">#                     streets_full = [</span>
+    <span class="c1">#                         street + f&quot; {val_num}&quot; + f&quot; {self.osm_city_name}&quot; + &quot; Россия&quot;</span>
+    <span class="c1">#                         for street in only_streets_full</span>
+    <span class="c1">#                     ]</span>
+
+    <span class="c1">#                     df.loc[idx, &quot;full_street_name&quot;] = &quot;,&quot;.join(streets_full)</span>
+    <span class="c1">#                     df.loc[idx, &quot;only_full_street_name&quot;] = &quot;,&quot;.join(only_streets_full)</span>
+
+    <span class="c1">#     df.dropna(subset=[&quot;full_street_name&quot;, &quot;only_full_street_name&quot;], inplace=True)</span>
+    <span class="c1">#     df[&quot;location_options&quot;] = df[&quot;full_street_name&quot;].str.split(&quot;,&quot;)</span>
+    <span class="c1">#     df[&quot;only_full_street_name&quot;] = df[&quot;only_full_street_name&quot;].str.split(&quot;,&quot;)</span>
+
+    <span class="c1">#     tmp_df_1 = df[&quot;location_options&quot;].explode()</span>
+    <span class="c1">#     tmp_df_1.name = &quot;addr_to_geocode&quot;</span>
+    <span class="c1">#     tmp_df_2 = df[&quot;only_full_street_name&quot;].explode()</span>
+    <span class="c1">#     tmp_df_2.name = &quot;only_full_street_name&quot;</span>
+    <span class="c1">#     new_df = tmp_df_1.to_frame().join(tmp_df_2.to_frame())</span>
+
+    <span class="c1">#     df.drop(columns=[&quot;only_full_street_name&quot;], inplace=True)</span>
+    <span class="c1">#     df = df.merge(new_df, left_on=df.index, right_on=new_df.index)</span>
+    <span class="c1">#     df.drop(columns=[&quot;key_0&quot;], inplace=True)</span>
+
+    <span class="c1">#     # new_df = df[&quot;only_full_street_name&quot;].explode()</span>
+    <span class="c1">#     # new_df.name = &quot;only_full_street_name&quot;</span>
+    <span class="c1">#     # df.drop(columns=[&#39;key_0&#39;, &#39;only_full_street_name&#39;], inplace=True)</span>
+    <span class="c1">#     # df = df.merge(new_df, left_on=df.index, right_on=new_df.index)</span>
+
+    <span class="c1">#     # print(df.head())</span>
+    <span class="c1">#     df[&quot;only_full_street_name&quot;] = df[&quot;only_full_street_name&quot;].astype(str)</span>
+    <span class="c1">#     df[&quot;location_options&quot;] = df[&quot;location_options&quot;].astype(str)</span>
+
+    <span class="c1">#     return df</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, itmo_idu
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/furo.js?v=4e2eecee"></script>
+    </body>
+</html>

@@ -1,0 +1,556 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="OtherGeoObjects" href="OtherGeoObjects.html" /><link rel="prev" title="Geo-objects finder" href="geocoder.html" />
+
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+        <title>Geocoder - sloyka 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/custom.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">sloyka 0.1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../_static/logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">sloyka 0.1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">About:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about/installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Receiving:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data_getter.html">Data getter</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="geocoder.html">Geo-objects finder</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Geo-objects finder</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Geocoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OtherGeoObjects.html">OtherGeoObjects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StreetExtractor.html">StreetExtractor</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tagging:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="city_services_extract.html">Services extraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emotion_classifier.html">Emotion classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emotion_classifier.html#example">Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_classifier.html">Text Classifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topic_modeler.html">Topic Modelling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modelling:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="semantic_graph.html">Semantic graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regional_activity.html">Regional activity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="event_dynamic_prediction.html">Event detector</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="visualize_graph.html">Graph visualization</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/modules/Geocoder_special.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="geocoder">
+<span id="geocoder-special"></span><h1>Geocoder<a class="headerlink" href="#geocoder" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sloyka.src.geocoder.geocoder.</span></span><span class="sig-name descname"><span class="pre">Geocoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Geor111y/flair-ner-addresses-extractor'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osm_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">city_tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'place':</span> <span class="pre">['state']}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder" title="Link to this definition">¶</a></dt>
+<dd><p>This class provides a functionality of simple geocoder</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.assign_street">
+<span class="sig-name descname"><span class="pre">assign_street</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.assign_street"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.assign_street" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.create_gdf">
+<span class="sig-name descname"><span class="pre">create_gdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.create_gdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.create_gdf" title="Link to this definition">¶</a></dt>
+<dd><p>Function simply creates gdf from the recognised geocoded geometries.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.dir_path">
+<span class="sig-name descname"><span class="pre">dir_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'C:\\Users\\perisique\\AppData\\Roaming\\Python\\Python311\\site-packages\\sloyka\\src\\geocoder'</span></em><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.dir_path" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.get_df_areas">
+<span class="sig-name descname"><span class="pre">get_df_areas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">osm_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.get_df_areas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.get_df_areas" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the GeoDataFrame of areas corresponding to the given OSM ID and tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>osm_id</strong> (<em>int</em>) – The OpenStreetMap ID.</p></li>
+<li><p><strong>tags</strong> (<em>dict</em>) – The tags to filter by.</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date of the data to retrieve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The GeoDataFrame containing the areas.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+<p>This function first checks if the GeoDataFrame corresponding to the given OSM ID is already in the cache.
+If it is, it returns the cached GeoDataFrame. Otherwise, it retrieves the GeoDataFrame from the HistGeoDataGetter,
+filters out the ‘way’ elements, and adds it to the cache. Finally, it returns the GeoDataFrame from the cache.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.get_level">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.get_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.get_level" title="Link to this definition">¶</a></dt>
+<dd><p>Addresses in the messages are recognized on different scales:
+1. Where we know the street name and house number – house level;
+2. Where we know only street name – street level (with the centroid
+geometry of the street);
+3. Where we don’t know any info but the city – global level.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.get_stem">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_stem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">street_names_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.get_stem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.get_stem" title="Link to this definition">¶</a></dt>
+<dd><p>Function finds the stem of the word to find this stem in the street
+names dictionary (df).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.global_crs">
+<span class="sig-name descname"><span class="pre">global_crs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4326</span></em><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.global_crs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.match_group_to_area">
+<span class="sig-name descname"><span class="pre">match_group_to_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_areas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.match_group_to_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.match_group_to_area" title="Link to this definition">¶</a></dt>
+<dd><p>Matches a given group name to an area in a DataFrame of areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_name</strong> (<em>str</em>) – The name of the group to match.</p></li>
+<li><p><strong>df_areas</strong> (<em>DataFrame</em>) – The DataFrame containing the areas to match against.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing the best match for the group name and the admin level of the match.</dt><dd><p>If no match is found, returns (None, None).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.merge_to_initial_df">
+<span class="sig-name descname"><span class="pre">merge_to_initial_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.merge_to_initial_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.merge_to_initial_df" title="Link to this definition">¶</a></dt>
+<dd><p>This function merges geocoded df to the initial df in order to keep
+all original attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.preprocess_area_names">
+<span class="sig-name descname"><span class="pre">preprocess_area_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_areas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.preprocess_area_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.preprocess_area_names" title="Link to this definition">¶</a></dt>
+<dd><p>Preprocesses the area names in the given DataFrame by removing specified stopwords, converting the names to lowercase,
+and stemming them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df_areas</strong> (<em>DataFrame</em>) – The DataFrame containing the area names.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The DataFrame with preprocessed area names, where the ‘area_name’ column contains the original names</dt><dd><p>with stopwords removed, the ‘area_name_processed’ column contains the lowercase names with special characters
+removed, and the ‘area_stems’ column contains the stemmed names.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.preprocess_group_name">
+<span class="sig-name descname"><span class="pre">preprocess_group_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.preprocess_group_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.preprocess_group_name" title="Link to this definition">¶</a></dt>
+<dd><p>Preprocesses a group name by converting it to lowercase, removing special characters, and removing specified stopwords.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>group_name</strong> (<em>str</em>) – The group name to preprocess.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The preprocessed group name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'group_name'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_for_objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.run" title="Link to this definition">¶</a></dt>
+<dd><p>Runs the data processing pipeline on the input DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tags</strong> (<em>dict</em>) – The tags to filter by.</p></li>
+<li><p><strong>date</strong> (<em>str</em>) – The date of the data to retrieve.</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – The input DataFrame.</p></li>
+<li><p><strong>text_column</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the text column in the DataFrame. Defaults to “text”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The processed DataFrame after running the data processing pipeline.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+<p>This function retrieves the GeoDataFrame of areas corresponding to the given OSM ID and tags.
+It then preprocesses the area names and matches each group name to an area. The best match
+and admin level are assigned to the DataFrame. The function also retrieves other geographic
+objects and street names, preprocesses the street names, finds the word form, creates a GeoDataFrame,
+merges it with the other geographic objects, assigns the street tag, and returns the final GeoDataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sloyka.src.geocoder.geocoder.Geocoder.set_global_repr_point">
+<span class="sig-name descname"><span class="pre">set_global_repr_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/sloyka/src/geocoder/geocoder.html#Geocoder.set_global_repr_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sloyka.src.geocoder.geocoder.Geocoder.set_global_repr_point" title="Link to this definition">¶</a></dt>
+<dd><p>This function set the centroid (actually, representative point) of the
+geocoded addresses to those texts that weren’t geocoded (or didn’t
+contain any addresses according to the trained NER model).</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Back to all <a class="reference internal" href="geocoder.html#geocoder"><span class="std std-ref">Geo-objects finder</span></a></p>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="OtherGeoObjects.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">OtherGeoObjects</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="geocoder.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Geo-objects finder</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, itmo_idu
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Geocoder</a><ul>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder"><code class="docutils literal notranslate"><span class="pre">Geocoder</span></code></a><ul>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.assign_street"><code class="docutils literal notranslate"><span class="pre">Geocoder.assign_street()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.create_gdf"><code class="docutils literal notranslate"><span class="pre">Geocoder.create_gdf()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.dir_path"><code class="docutils literal notranslate"><span class="pre">Geocoder.dir_path</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.get_df_areas"><code class="docutils literal notranslate"><span class="pre">Geocoder.get_df_areas()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.get_level"><code class="docutils literal notranslate"><span class="pre">Geocoder.get_level()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.get_stem"><code class="docutils literal notranslate"><span class="pre">Geocoder.get_stem()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.global_crs"><code class="docutils literal notranslate"><span class="pre">Geocoder.global_crs</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.match_group_to_area"><code class="docutils literal notranslate"><span class="pre">Geocoder.match_group_to_area()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.merge_to_initial_df"><code class="docutils literal notranslate"><span class="pre">Geocoder.merge_to_initial_df()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.preprocess_area_names"><code class="docutils literal notranslate"><span class="pre">Geocoder.preprocess_area_names()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.preprocess_group_name"><code class="docutils literal notranslate"><span class="pre">Geocoder.preprocess_group_name()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.run"><code class="docutils literal notranslate"><span class="pre">Geocoder.run()</span></code></a></li>
+<li><a class="reference internal" href="#sloyka.src.geocoder.geocoder.Geocoder.set_global_repr_point"><code class="docutils literal notranslate"><span class="pre">Geocoder.set_global_repr_point()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
+    </body>
+</html>
